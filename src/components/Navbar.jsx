@@ -17,8 +17,8 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg group-hover:shadow-brand-500/40 transition-shadow">
-            <BookOpen size={18} className="text-white" />
+          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg group-hover:shadow-brand-500/40 transition-shadow">
+            <img src="/logo.png" alt="Canxine-Zer0 Logo" className="w-full h-full object-cover" />
           </div>
           <span className="text-lg font-bold text-gradient">Canxine-Zer0</span>
         </Link>

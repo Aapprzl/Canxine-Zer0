@@ -27,8 +27,8 @@ export default function AdminLayout() {
         {/* Logo */}
         <div className="p-5 border-b border-slate-700/50">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
-              <BookOpen size={15} className="text-white" />
+            <div className="w-8 h-8 rounded-xl overflow-hidden">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <p className="font-bold text-white text-sm">Canxine-Zer0</p>
