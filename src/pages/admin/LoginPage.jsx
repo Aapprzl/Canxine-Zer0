@@ -38,7 +38,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2.5 mb-4">
             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+              <img src="/logo.svg" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-xl font-bold text-gradient">Canxine-Zer0</span>
           </div>

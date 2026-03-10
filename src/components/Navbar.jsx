@@ -18,7 +18,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg group-hover:shadow-brand-500/40 transition-shadow">
-            <img src="/logo.png" alt="Canxine-Zer0 Logo" className="w-full h-full object-cover" />
+            <img src="/logo.svg" alt="Canxine-Zer0 Logo" className="w-full h-full object-cover" />
           </div>
           <span className="text-lg font-bold text-gradient">Canxine-Zer0</span>
         </Link>
