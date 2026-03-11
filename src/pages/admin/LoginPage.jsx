@@ -60,7 +60,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 className={`input-field ${errors.email ? 'border-red-500' : ''}`}
-                placeholder="admin@canxine-zer0.com"
+                placeholder="admin@example.com"
                 {...register('email', { required: 'Email wajib diisi.' })}
               />
               {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>}

@@ -11,9 +11,9 @@ function formatDate(dateStr) {
 }
 
 export default function ArticleCard({ article }) {
-  const summary = article.content
+  const summary = article.description || (article.content
     ? article.content.replace(/[#*`>\[\]!]/g, '').slice(0, 100).trim() + '...'
-    : 'Tidak ada deskripsi.'
+    : 'Tidak ada deskripsi.')
 
   return (
     <Link

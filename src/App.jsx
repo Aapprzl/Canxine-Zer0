@@ -22,6 +22,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminCategories from './pages/admin/AdminCategories'
 import AdminTopics from './pages/admin/AdminTopics'
 import AdminArticles from './pages/admin/AdminArticles'
+import AdminArticleEditor from './pages/admin/AdminArticleEditor'
 
 export default function App() {
   return (
@@ -53,6 +54,8 @@ export default function App() {
             <Route path="categories" element={<AdminCategories />} />
             <Route path="topics" element={<AdminTopics />} />
             <Route path="articles" element={<AdminArticles />} />
+            <Route path="articles/new" element={<AdminArticleEditor />} />
+            <Route path="articles/edit/:id" element={<AdminArticleEditor />} />
           </Route>
 
           {/* 404 */}
