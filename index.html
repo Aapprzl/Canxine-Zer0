@@ -8,6 +8,15 @@
     <meta property="og:title" content="Canxine-Zer0 – Platform Pembelajaran Pribadi" />
     <meta property="og:description" content="Jelajahi materi pembelajaran terstruktur di Canxine-Zer0." />
     <title>Canxine-Zer0 – Platform Pembelajaran</title>
+    <script>
+      try {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+      } catch (_) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

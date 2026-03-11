@@ -6,22 +6,46 @@ import { Sparkles } from 'lucide-react'
 
 export default function HomePage() {
   const [categories, setCategories] = useState([])
+  const [settings, setSettings] = useState({
+    hero_title: '',
+    hero_title_highlight: '',
+    hero_subtitle: '',
+    hero_badge: ''
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data, error } = await supabase
+    const fetchData = async () => {
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('site_settings')
+        .select('key, value')
+        .in('key', ['hero_title', 'hero_title_highlight', 'hero_subtitle', 'hero_badge'])
+
+      if (settingsData) {
+        const settingsMap = {}
+        settingsData.forEach(item => {
+          settingsMap[item.key] = item.value
+        })
+        setSettings(prev => ({ ...prev, ...settingsMap }))
+      }
+
+      // Fetch categories
+      const { data: catData, error: catError } = await supabase
         .from('categories')
         .select('*')
         .order('created_at', { ascending: true })
 
-      if (error) setError(error.message)
-      else setCategories(data)
+      if (catError) setError(catError.message)
+      else setCategories(catData || [])
+      
       setLoading(false)
     }
-    fetchCategories()
+    fetchData()
   }, [])
+
+  if (loading) return <LoadingSpinner />
 
   return (
     <>
@@ -32,15 +56,14 @@ export default function HomePage() {
         <div className="page-container relative text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-6">
             <Sparkles size={14} />
-            Platform Pembelajaran Pribadi
+            {settings.hero_badge}
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-5 leading-tight tracking-tight transition-colors">
-            Selamat Datang di{' '}
-            <span className="text-gradient">Canxine-Zer0</span>
+            {settings.hero_title}{' '}
+            <span className="text-gradient">{settings.hero_title_highlight}</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed transition-colors">
-            Jelajahi materi pembelajaran terstruktur dalam berbagai kategori dan topik.
-            Belajar dengan cara Anda sendiri.
+            {settings.hero_subtitle}
           </p>
         </div>
       </section>
@@ -56,8 +79,6 @@ export default function HomePage() {
             <span className="badge badge-gray">{categories.length} kategori</span>
           )}
         </div>
-
-        {loading && <LoadingSpinner />}
 
         {error && (
           <div className="glass-card border-red-500/30 p-6 text-center">

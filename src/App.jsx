@@ -23,6 +23,7 @@ import AdminCategories from './pages/admin/AdminCategories'
 import AdminTopics from './pages/admin/AdminTopics'
 import AdminArticles from './pages/admin/AdminArticles'
 import AdminArticleEditor from './pages/admin/AdminArticleEditor'
+import AdminSettings from './pages/admin/AdminSettings'
 
 import { ThemeProvider } from './contexts/ThemeContext'
 
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="articles" element={<AdminArticles />} />
             <Route path="articles/new" element={<AdminArticleEditor />} />
             <Route path="articles/edit/:id" element={<AdminArticleEditor />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* 404 */}

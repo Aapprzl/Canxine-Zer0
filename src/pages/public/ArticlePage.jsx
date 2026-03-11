@@ -74,8 +74,15 @@ export default function ArticlePage() {
 
       {/* Hero image */}
       {article.image_url && (
-        <div className="rounded-2xl overflow-hidden mb-8 aspect-video">
-          <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
+        <div className="mb-8">
+          <div className="rounded-2xl overflow-hidden aspect-video relative group">
+            <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
+          </div>
+          {article.image_source && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center italic transition-colors">
+              Sumber gambar: {article.image_source}
+            </p>
+          )}
         </div>
       )}
 

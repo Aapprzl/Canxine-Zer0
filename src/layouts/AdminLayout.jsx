@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import {
-  BookOpen, LayoutDashboard, FolderOpen, BookMarked, FileText, LogOut, ChevronRight
+  BookOpen, LayoutDashboard, FolderOpen, BookMarked, FileText, LogOut, ChevronRight, Settings
 } from 'lucide-react'
 import ThemeToggle from '../components/ThemeToggle'
 
@@ -19,6 +19,7 @@ export default function AdminLayout() {
     { to: '/admin/categories', label: 'Kategori', icon: FolderOpen },
     { to: '/admin/topics', label: 'Topik', icon: BookMarked },
     { to: '/admin/articles', label: 'Artikel', icon: FileText },
+    { to: '/admin/settings', label: 'Pengaturan', icon: Settings },
   ]
 
   return (

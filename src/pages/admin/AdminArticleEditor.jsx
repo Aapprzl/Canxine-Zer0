@@ -52,6 +52,7 @@ export default function AdminArticleEditor() {
       author: '',
       published: false,
       image_url: '',
+      image_source: '',
       description: ''
     }
   })
@@ -97,6 +98,7 @@ export default function AdminArticleEditor() {
         author: data.author || '',
         published: data.published,
         image_url: data.image_url || '',
+        image_source: data.image_source || '',
         description: data.description || ''
       })
       setImgPreviewUrl(data.image_url || '')
@@ -352,6 +354,15 @@ export default function AdminArticleEditor() {
       finalContent += `\n\n<!-- CONTENT_IMAGES: ${JSON.stringify(contentImages)} -->`
     }
 
+    let autoDesc = finalContent
+      .replace(/<!--[\s\S]*?-->/g, '') // remove HTML comments
+      .replace(/!\[.*?\]\(.*?\)/g, '') // remove images
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // remove links but keep text
+      .replace(/[#*`_>~]/g, '') // remove markdown characters
+      .replace(/\n+/g, ' ') // replace newlines with spaces
+      .trim();
+    if (autoDesc.length > 160) autoDesc = autoDesc.substring(0, 160) + '...';
+
     const payload = {
       title: values.title,
       slug: values.slug,
@@ -359,7 +370,8 @@ export default function AdminArticleEditor() {
       topic_id: parseInt(values.topic_id),
       author: values.author || null,
       image_url: values.image_url || null,
-      description: values.description || null,
+      image_source: values.image_source || null,
+      description: autoDesc || null,
       published: values.published,
     }
 
@@ -451,16 +463,6 @@ export default function AdminArticleEditor() {
               </div>
             </div>
 
-            <div>
-              <label className="label">Deskripsi Singkat <span className="text-slate-500 font-normal text-xs">(Muncul di halaman daftar artikel)</span></label>
-              <textarea 
-                rows={2} 
-                className="input-field resize-none px-4 py-3" 
-                {...register('description')} 
-                placeholder="Tulis ringkasan singkat artikel di sini..."
-              />
-            </div>
-
             {/* Image upload */}
             <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 transition-colors">
               <label className="label">Gambar Artikel</label>
@@ -477,6 +479,16 @@ export default function AdminArticleEditor() {
                     {uploadingImg ? <><Loader2 size={18} className="animate-spin" /> Mengupload...</> : <><ImagePlus size={18} /> Pilih Gambar Utama</>}
                   </button>
                   <p className="text-xs text-slate-500 mt-2 text-center transition-colors">Rekomendasi ukuran: 1200x630px. Maks 5MB.</p>
+                  
+                  <div className="mt-4">
+                    <label className="label text-xs">Sumber Gambar (Opsional)</label>
+                    <input 
+                      type="text" 
+                      className="input-field text-sm py-2" 
+                      {...register('image_source')} 
+                      placeholder="Contoh: Unsplash, Freepik, Dokumentasi Pribadi..."
+                    />
+                  </div>
                 </div>
                 {imgPreviewUrl && (
                   <div className="relative group">

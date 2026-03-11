@@ -22,12 +22,19 @@ export default function ArticleCard({ article }) {
     >
       {/* Thumbnail */}
       {article.image_url ? (
-        <div className="h-44 overflow-hidden">
+        <div className="h-44 overflow-hidden relative group/img">
           <img
             src={article.image_url}
             alt={article.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
+          {article.image_source && (
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-end p-3">
+              <span className="text-[10px] text-white/90 truncate w-full flex items-center gap-1.5">
+                Sumber: {article.image_source}
+              </span>
+            </div>
+          )}
         </div>
       ) : (
         <div className="h-44 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-dark-700 dark:to-dark-800 flex items-center justify-center transition-colors">

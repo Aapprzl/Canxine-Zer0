@@ -1,22 +1,73 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { supabase } from '../../lib/supabaseClient'
 import { BookOpen, Target, Users, Sparkles } from 'lucide-react'
 
+import LoadingSpinner from '../../components/LoadingSpinner'
+
 export default function AboutPage() {
+  const [loading, setLoading] = useState(true)
+  const [settings, setSettings] = useState({
+    about_header_title: '',
+    about_header_highlight: '',
+    about_header_subtitle: '',
+    about_badge: '',
+    feature_1_title: '',
+    feature_1_desc: '',
+    feature_2_title: '',
+    feature_2_desc: '',
+    feature_3_title: '',
+    feature_3_desc: '',
+    about_mission_1: '',
+    about_mission_2: ''
+  })
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('key, value')
+        .in('key', [
+          'about_header_title', 
+          'about_header_highlight', 
+          'about_header_subtitle', 
+          'about_badge',
+          'feature_1_title', 'feature_1_desc',
+          'feature_2_title', 'feature_2_desc',
+          'feature_3_title', 'feature_3_desc',
+          'about_mission_1', 
+          'about_mission_2'
+        ])
+
+      if (data && data.length > 0) {
+        const settingsMap = {}
+        data.forEach(item => {
+          settingsMap[item.key] = item.value
+        })
+        setSettings(prev => ({ ...prev, ...settingsMap }))
+      }
+      setLoading(false)
+    }
+    fetchSettings()
+  }, [])
+
+  if (loading) return <LoadingSpinner />
+
   const features = [
     {
       icon: BookOpen,
-      title: 'Konten Terstruktur',
-      desc: 'Materi pembelajaran diorganisir dalam kategori, topik, dan artikel yang mudah diikuti.',
+      title: settings.feature_1_title,
+      desc: settings.feature_1_desc,
     },
     {
       icon: Target,
-      title: 'Belajar Mandiri',
-      desc: 'Dirancang untuk mendukung gaya belajar mandiri dengan kecepatan Anda sendiri.',
+      title: settings.feature_2_title,
+      desc: settings.feature_2_desc,
     },
     {
       icon: Users,
-      title: 'Diperbarui Rutin',
-      desc: 'Admin secara aktif menambahkan dan memperbarui konten untuk relevansi yang terjaga.',
+      title: settings.feature_3_title,
+      desc: settings.feature_3_desc,
     },
   ]
 
@@ -26,14 +77,13 @@ export default function AboutPage() {
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-6">
           <Sparkles size={14} />
-          Tentang Kami
+          {settings.about_badge}
         </div>
         <h1 className="section-title text-4xl mb-4">
-          Apa itu <span className="text-gradient">Canxine-Zer0</span>?
+          {settings.about_header_title} <span className="text-gradient">{settings.about_header_highlight}</span>
         </h1>
         <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          Canxine-Zer0 adalah platform pembelajaran pribadi yang menyediakan konten pendidikan
-          dalam format yang terstruktur, mudah diakses, dan terus diperbarui.
+          {settings.about_header_subtitle}
         </p>
       </div>
 
@@ -54,13 +104,10 @@ export default function AboutPage() {
       <div className="glass-card p-8 mb-10">
         <h2 className="text-2xl font-bold text-white mb-4">Misi Kami</h2>
         <p className="text-slate-400 leading-relaxed mb-4">
-          Platform ini dibangun dengan visi untuk menjadikan pembelajaran lebih mudah dan menyenangkan.
-          Kami percaya bahwa setiap orang berhak mendapatkan akses ke pengetahuan berkualitas,
-          kapan saja dan di mana saja.
+          {settings.about_mission_1}
         </p>
         <p className="text-slate-400 leading-relaxed">
-          Dengan menggunakan teknologi modern, Canxine-Zer0 menghadirkan pengalaman belajar
-          yang intuitif dan bebas hambatan — dari kategori luas hingga artikel teknis yang mendalam.
+          {settings.about_mission_2}
         </p>
       </div>
 
