@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { useForm } from 'react-hook-form'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { ArrowLeft, Save, Eye, Code2, ImagePlus, Loader2, X, FileUp } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Code2, ImagePlus, Loader2, X, FileUp, Copy, Check, UploadCloud } from 'lucide-react'
 
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
@@ -23,7 +23,12 @@ export default function AdminArticleEditor() {
   const [uploadingImg, setUploadingImg] = useState(false)
   const [imgPreviewUrl, setImgPreviewUrl] = useState('')
   const fileInputRef = useRef()
+  const contentImagesRef = useRef()
   const mdInputRef = useRef()
+
+  const [contentImages, setContentImages] = useState([])
+  const [uploadingContent, setUploadingContent] = useState(false)
+  const [copiedIndex, setCopiedIndex] = useState(null)
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -98,6 +103,39 @@ export default function AdminArticleEditor() {
       setServerError('Gagal upload gambar: ' + error.message)
     }
     setUploadingImg(false)
+  }
+
+  const handleContentImagesUpload = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+
+    setUploadingContent(true)
+    const newImages = []
+
+    for (const file of files) {
+      const ext = file.name.split('.').pop()
+      const fileName = `content-img/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+      
+      const { error } = await supabase.storage.from('article-images').upload(fileName, file)
+      
+      if (!error) {
+        const { data: urlData } = supabase.storage.from('article-images').getPublicUrl(fileName)
+        newImages.push({
+          url: urlData.publicUrl,
+          name: file.name
+        })
+      }
+    }
+
+    setContentImages(prev => [...prev, ...newImages])
+    setUploadingContent(false)
+    e.target.value = ''
+  }
+
+  const copyToClipboard = (text, index) => {
+    navigator.clipboard.writeText(text)
+    setCopiedIndex(index)
+    setTimeout(() => setCopiedIndex(null), 2000)
   }
 
   const handleMarkdownImport = (e) => {
@@ -293,19 +331,83 @@ export default function AdminArticleEditor() {
               </div>
 
               {previewMode ? (
-                <div className="min-h-[400px] bg-dark-800/50 border border-slate-700/50 rounded-xl p-8 prose prose-invert prose-lg max-w-none
+                <div className="h-[600px] overflow-y-auto bg-dark-800/50 border border-slate-700/50 rounded-xl p-8 prose prose-invert prose-lg max-w-none
                   prose-headings:text-white prose-p:text-slate-300 prose-a:text-brand-400 prose-code:text-accent-300
                   prose-code:bg-dark-900 prose-pre:bg-dark-900 prose-blockquote:border-brand-500 prose-li:text-slate-300 shadow-inner">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentVal || '*Konten kosong. Silakan tulis sesuatu...*'}</ReactMarkdown>
                 </div>
               ) : (
                 <textarea
-                  rows={15}
-                  className="input-field resize-y font-mono text-sm min-h-[400px] p-6"
+                  className="input-field resize-none font-mono text-sm h-[600px] p-6"
                   placeholder="# Judul Artikel&#10;&#10;Tulis isi artikel Anda dengan format Markdown di sini...&#10;&#10;Gunakan toolbar di atas untuk melihat preview."
                   {...register('content')}
                 />
               )}
+            </div>
+
+            {/* Content Image Manager */}
+            <div className="bg-slate-800/30 rounded-xl border border-slate-700/50 overflow-hidden">
+              <div className="p-4 border-b border-slate-700/50 bg-slate-800/50 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Manager Gambar Konten</h3>
+                  <p className="text-xs text-slate-500">Upload gambar untuk digunakan dalam isi artikel</p>
+                </div>
+                <div>
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    ref={contentImagesRef} 
+                    className="hidden" 
+                    onChange={handleContentImagesUpload} 
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => contentImagesRef.current?.click()}
+                    disabled={uploadingContent}
+                    className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-2"
+                  >
+                    {uploadingContent ? <Loader2 size={14} className="animate-spin" /> : <UploadCloud size={14} />}
+                    Upload Gambar
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4">
+                {contentImages.length === 0 ? (
+                  <div className="py-8 text-center text-slate-500 text-sm italic">
+                    Belum ada gambar konten yang diupload
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                    {contentImages.map((img, idx) => {
+                      const mdCode = `![${img.name}](${img.url})`
+                      return (
+                        <div key={idx} className="relative group aspect-square rounded-lg border border-slate-700 overflow-hidden bg-dark-900">
+                          <img src={img.url} alt={img.name} className="w-full h-full object-cover" title={img.name} />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 gap-2 text-center text-[10px]">
+                            <button 
+                              type="button"
+                              onClick={() => copyToClipboard(mdCode, idx)}
+                              className="w-full btn-primary py-1 px-1 flex items-center justify-center gap-1"
+                            >
+                              {copiedIndex === idx ? <Check size={10} /> : <Copy size={10} />}
+                              {copiedIndex === idx ? 'Copied' : 'Copy MD'}
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setContentImages(prev => prev.filter((_, i) => i !== idx))}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-3 p-4 bg-slate-800/20 rounded-xl border border-slate-700/50">

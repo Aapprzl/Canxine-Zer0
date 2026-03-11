@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,9 +18,16 @@
   }
 
   body {
-    @apply bg-dark-900 text-slate-200 font-sans antialiased;
+    @apply bg-dark-900 text-slate-200 antialiased;
+    font-family: "Plus Jakarta Sans", "Noto Sans Arabic", Inter, sans-serif;
     min-height: 100vh;
   }
+
+  .prose {
+    font-family: "Plus Jakarta Sans", "Noto Sans Arabic", Inter, sans-serif !important;
+  }
+
+  /* Arabic font is handled via fallback in tailwind.config.js sans stack */
 
   ::selection {
     @apply bg-brand-500/30 text-brand-200;
