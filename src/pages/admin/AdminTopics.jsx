@@ -78,8 +78,8 @@ export default function AdminTopics() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Topik</h1>
-          <p className="text-slate-400 text-sm">Kelola semua topik pembelajaran</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 transition-colors">Topik</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Kelola semua topik pembelajaran</p>
         </div>
         <button onClick={() => openForm()} className="btn-primary">
           <Plus size={16} /> Tambah Topik
@@ -114,11 +114,15 @@ export default function AdminTopics() {
               {loading && <tr><td colSpan={5} className="table-td text-center py-12 text-slate-500">Memuat...</td></tr>}
               {!loading && filtered.length === 0 && <tr><td colSpan={5} className="table-td text-center py-12 text-slate-500">Belum ada topik.</td></tr>}
               {filtered.map(t => (
-                <tr key={t.id} className="hover:bg-slate-700/20 transition-colors">
-                  <td className="table-td font-medium text-white">{t.name}</td>
-                  <td className="table-td"><code className="text-xs text-accent-300 bg-dark-700 px-2 py-0.5 rounded">{t.slug}</code></td>
-                  <td className="table-td text-slate-400">{t.categories?.name || '—'}</td>
-                  <td className="table-td text-slate-400 max-w-xs truncate">{t.description || '—'}</td>
+                <tr key={t.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/20 transition-colors">
+                  <td className="table-td font-medium text-slate-900 dark:text-white transition-colors">{t.name}</td>
+                  <td className="table-td transition-colors">
+                    <code className="text-xs text-accent-600 dark:text-accent-300 bg-slate-100 dark:bg-dark-700 px-2 py-0.5 rounded transition-colors">
+                      {t.slug}
+                    </code>
+                  </td>
+                  <td className="table-td text-slate-500 dark:text-slate-400 transition-colors">{t.categories?.name || '—'}</td>
+                  <td className="table-td text-slate-500 dark:text-slate-400 max-w-xs truncate transition-colors">{t.description || '—'}</td>
                   <td className="table-td text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openForm(t)} className="p-2 rounded-lg text-slate-400 hover:text-brand-300 hover:bg-brand-500/10 transition-all"><Pencil size={14} /></button>
@@ -136,10 +140,10 @@ export default function AdminTopics() {
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setFormOpen(false)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative glass-card w-full max-w-lg p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="relative glass-card w-full max-w-lg p-6 shadow-2xl transition-colors" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-white">{editing ? 'Edit Topik' : 'Tambah Topik'}</h2>
-              <button onClick={() => setFormOpen(false)}><X size={18} className="text-slate-400 hover:text-white" /></button>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors">{editing ? 'Edit Topik' : 'Tambah Topik'}</h2>
+              <button onClick={() => setFormOpen(false)}><X size={18} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" /></button>
             </div>
             {serverError && <div className="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl p-3">{serverError}</div>}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -24,10 +24,13 @@ import AdminTopics from './pages/admin/AdminTopics'
 import AdminArticles from './pages/admin/AdminArticles'
 import AdminArticleEditor from './pages/admin/AdminArticleEditor'
 
+import { ThemeProvider } from './contexts/ThemeContext'
+
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
         <Routes>
           {/* Public Routes */}
           <Route element={<Layout />}>
@@ -62,6 +65,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
-    </BrowserRouter>
+    </ThemeProvider>
+  </BrowserRouter>
   )
 }

@@ -5,7 +5,7 @@ export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="mt-auto border-t border-slate-700/50 bg-dark-900">
+    <footer className="mt-auto border-t border-slate-200 dark:border-slate-700/50 bg-white dark:bg-dark-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Brand */}
@@ -14,15 +14,15 @@ export default function Footer() {
               <img src="/logo.svg" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">Canxine-Zer0</p>
+              <p className="font-bold text-slate-900 dark:text-white text-sm transition-colors">Canxine-Zer0</p>
               <p className="text-xs text-slate-500">Platform Pembelajaran Pribadi</p>
             </div>
           </div>
 
           {/* Links */}
           <div className="flex items-center gap-4 text-sm text-slate-500">
-            <Link to="/" className="hover:text-slate-300 transition-colors">Beranda</Link>
-            <Link to="/tentang" className="hover:text-slate-300 transition-colors">Tentang</Link>
+            <Link to="/" className="hover:text-brand-600 dark:hover:text-slate-300 transition-colors">Beranda</Link>
+            <Link to="/tentang" className="hover:text-brand-600 dark:hover:text-slate-300 transition-colors">Tentang</Link>
           </div>
 
           {/* Copyright */}

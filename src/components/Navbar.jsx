@@ -1,7 +1,8 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { BookOpen, ShieldCheck, Menu, X } from 'lucide-react'
+import { ShieldCheck, Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import ThemeToggle from './ThemeToggle'
 
 export default function Navbar() {
   const { user, isAdmin } = useAuth()
@@ -13,7 +14,7 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-slate-700/50">
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-dark-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700/50 transition-colors duration-300">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
@@ -33,8 +34,8 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-brand-500/20 text-brand-300'
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700/50'
+                    ? 'bg-brand-500/20 text-brand-600 dark:text-brand-300'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700/50'
                 }`
               }
             >
@@ -50,20 +51,26 @@ export default function Navbar() {
               Admin
             </Link>
           )}
+          <div className="ml-2 pl-2 border-l border-slate-200 dark:border-slate-700/50">
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Mobile menu button */}
-        <button
-          className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50"
-          onClick={() => setOpen(!open)}
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden border-t border-slate-700/50 bg-dark-900/95 backdrop-blur-lg px-4 py-3 flex flex-col gap-1">
+        <div className="md:hidden border-t border-slate-200 dark:border-slate-700/50 bg-white/95 dark:bg-dark-900/95 backdrop-blur-lg px-4 py-3 flex flex-col gap-1">
           {navLinks.map(link => (
             <NavLink
               key={link.to}
@@ -73,8 +80,8 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-brand-500/20 text-brand-300'
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700/50'
+                    ? 'bg-brand-500/20 text-brand-600 dark:text-brand-300'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700/50'
                 }`
               }
             >

@@ -44,31 +44,31 @@ export default function CategoryPage() {
   return (
     <div className="page-container">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-        <Link to="/" className="flex items-center gap-1 hover:text-slate-300 transition-colors">
+      <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8 transition-colors">
+        <Link to="/" className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-slate-300 transition-colors">
           <Home size={14} /> Beranda
         </Link>
         <ChevronRight size={14} />
-        <span className="text-slate-300">{category.name}</span>
+        <span className="text-slate-900 dark:text-slate-300 font-medium transition-colors">{category.name}</span>
       </nav>
 
       {/* Header */}
       <div className="mb-10">
-        <h1 className="section-title mb-3">{category.name}</h1>
+        <h1 className="section-title mb-3 transition-colors">{category.name}</h1>
         {category.description && (
-          <p className="text-slate-400 max-w-2xl">{category.description}</p>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl transition-colors">{category.description}</p>
         )}
       </div>
 
       {/* Topics */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-white">Daftar Topik</h2>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white transition-colors">Daftar Topik</h2>
         <span className="badge badge-gray">{topics.length} topik</span>
       </div>
 
       {topics.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <p className="text-slate-400">Belum ada topik dalam kategori ini.</p>
+        <div className="glass-card p-12 text-center transition-colors">
+          <p className="text-slate-600 dark:text-slate-400">Belum ada topik dalam kategori ini.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -83,11 +83,11 @@ export default function CategoryPage() {
                   <BookMarked size={16} className="text-brand-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white group-hover:text-brand-300 transition-colors mb-1">
+                  <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors mb-1 transition-colors">
                     {topic.name}
                   </h3>
                   {topic.description && (
-                    <p className="text-sm text-slate-400 line-clamp-2">{topic.description}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 transition-colors">{topic.description}</p>
                   )}
                 </div>
               </div>

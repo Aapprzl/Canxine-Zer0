@@ -69,39 +69,39 @@ export default function TopicPage() {
   return (
     <div className="page-container">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8 flex-wrap">
-        <Link to="/" className="flex items-center gap-1 hover:text-slate-300 transition-colors">
+      <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8 flex-wrap transition-colors">
+        <Link to="/" className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-slate-300 transition-colors">
           <Home size={14} /> Beranda
         </Link>
         <ChevronRight size={14} />
         {category && (
           <>
-            <Link to={`/kategori/${category.slug}`} className="hover:text-slate-300 transition-colors">
+            <Link to={`/kategori/${category.slug}`} className="hover:text-brand-600 dark:hover:text-slate-300 transition-colors">
               {category.name}
             </Link>
             <ChevronRight size={14} />
           </>
         )}
-        <span className="text-slate-300">{topic.name}</span>
+        <span className="text-slate-900 dark:text-slate-300 font-medium transition-colors">{topic.name}</span>
       </nav>
 
       {/* Header */}
       <div className="mb-10">
-        <h1 className="section-title mb-3">{topic.name}</h1>
+        <h1 className="section-title mb-3 transition-colors">{topic.name}</h1>
         {topic.description && (
-          <p className="text-slate-400 max-w-2xl">{topic.description}</p>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl transition-colors">{topic.description}</p>
         )}
       </div>
 
       {/* Articles */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-white">Daftar Artikel</h2>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white transition-colors">Daftar Artikel</h2>
         <span className="badge badge-gray">{totalCount} artikel</span>
       </div>
 
       {articles.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <p className="text-slate-400">Belum ada artikel dalam topik ini.</p>
+        <div className="glass-card p-12 text-center transition-colors">
+          <p className="text-slate-600 dark:text-slate-400">Belum ada artikel dalam topik ini.</p>
         </div>
       ) : (
         <>

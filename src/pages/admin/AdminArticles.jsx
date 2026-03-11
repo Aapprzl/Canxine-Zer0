@@ -86,8 +86,8 @@ export default function AdminArticles() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Artikel</h1>
-          <p className="text-slate-400 text-sm">Kelola semua artikel pembelajaran</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 transition-colors">Artikel</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Kelola semua artikel pembelajaran</p>
         </div>
         <button onClick={() => navigate('/admin/articles/new')} className="btn-primary">
           <Plus size={16} /> Tambah Artikel
@@ -111,10 +111,10 @@ export default function AdminArticles() {
               {loading && <tr><td colSpan={5} className="table-td text-center py-12 text-slate-500">Memuat...</td></tr>}
               {!loading && articles.length === 0 && <tr><td colSpan={5} className="table-td text-center py-12 text-slate-500">Belum ada artikel.</td></tr>}
               {articles.map(a => (
-                <tr key={a.id} className="hover:bg-slate-700/20 transition-colors">
-                  <td className="table-td font-medium text-white max-w-xs truncate">{a.title}</td>
-                  <td className="table-td text-slate-400">{a.topics?.name || '—'}</td>
-                  <td className="table-td text-slate-400">{a.author || '—'}</td>
+                <tr key={a.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/20 transition-colors">
+                  <td className="table-td font-medium text-slate-900 dark:text-white max-w-xs truncate transition-colors">{a.title}</td>
+                  <td className="table-td text-slate-500 dark:text-slate-400 transition-colors">{a.topics?.name || '—'}</td>
+                  <td className="table-td text-slate-500 dark:text-slate-400 transition-colors">{a.author || '—'}</td>
                   <td className="table-td">
                     <span className={a.published ? 'badge-green' : 'badge-gray'}>
                       {a.published ? 'Publik' : 'Draft'}

@@ -30,8 +30,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-dark-900">
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-900/20 via-dark-900 to-accent-600/10 pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-dark-900 transition-colors duration-300">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 dark:from-brand-900/20 via-white dark:via-dark-900 to-slate-200/50 dark:to-accent-600/10 pointer-events-none" />
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
@@ -42,8 +42,8 @@ export default function LoginPage() {
             </div>
             <span className="text-xl font-bold text-gradient">Canxine-Zer0</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Login Admin</h1>
-          <p className="text-sm text-slate-500 mt-1">Masuk ke panel pengelolaan konten</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Login Admin</h1>
+          <p className="text-sm text-slate-500 mt-1 transition-colors">Masuk ke panel pengelolaan konten</p>
         </div>
 
         {/* Form */}
@@ -78,7 +78,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

@@ -30,19 +30,19 @@ export default function ArticleCard({ article }) {
           />
         </div>
       ) : (
-        <div className="h-44 bg-gradient-to-br from-dark-700 to-dark-800 flex items-center justify-center">
-          <FileText size={36} className="text-slate-600" />
+        <div className="h-44 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-dark-700 dark:to-dark-800 flex items-center justify-center transition-colors">
+          <FileText size={36} className="text-slate-400 dark:text-slate-600" />
         </div>
       )}
 
       <div className="p-5">
-        <h3 className="text-base font-semibold text-white mb-2 leading-snug group-hover:text-brand-300 transition-colors line-clamp-2">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors line-clamp-2">
           {article.title}
         </h3>
-        <p className="text-sm text-slate-400 line-clamp-2 mb-4">
+        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-4">
           {summary}
         </p>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-500">
           {article.author && (
             <span className="flex items-center gap-1">
               <User size={11} />

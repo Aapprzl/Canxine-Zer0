@@ -393,12 +393,12 @@ export default function AdminArticleEditor() {
     <div className="p-8">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <Link to="/admin/articles" className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors">
+          <Link to="/admin/articles" className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors shadow-sm">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white">{isEditing ? 'Edit Artikel' : 'Tambah Artikel Baru'}</h1>
-            <p className="text-slate-400 text-sm">Kembali ke daftar artikel</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white transition-colors">{isEditing ? 'Edit Artikel' : 'Tambah Artikel Baru'}</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Kembali ke daftar artikel</p>
           </div>
         </div>
 
@@ -462,7 +462,7 @@ export default function AdminArticleEditor() {
             </div>
 
             {/* Image upload */}
-            <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+            <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 transition-colors">
               <label className="label">Gambar Artikel</label>
               <div className="flex items-start gap-6">
                 <div className="flex-1">
@@ -476,11 +476,11 @@ export default function AdminArticleEditor() {
                   >
                     {uploadingImg ? <><Loader2 size={18} className="animate-spin" /> Mengupload...</> : <><ImagePlus size={18} /> Pilih Gambar Utama</>}
                   </button>
-                  <p className="text-xs text-slate-500 mt-2 text-center">Rekomendasi ukuran: 1200x630px. Maks 5MB.</p>
+                  <p className="text-xs text-slate-500 mt-2 text-center transition-colors">Rekomendasi ukuran: 1200x630px. Maks 5MB.</p>
                 </div>
                 {imgPreviewUrl && (
                   <div className="relative group">
-                    <img src={imgPreviewUrl} alt="preview" className="w-40 h-24 object-cover rounded-xl border border-slate-600 shadow-lg" />
+                    <img src={imgPreviewUrl} alt="preview" className="w-40 h-24 object-cover rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg transition-colors" />
                     <button 
                       type="button" 
                       onClick={() => { setValue('image_url', ''); setImgPreviewUrl('') }}
@@ -509,18 +509,18 @@ export default function AdminArticleEditor() {
                   <button 
                     type="button" 
                     onClick={() => mdInputRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-brand-400 border border-brand-500/30 rounded-lg hover:bg-brand-500/10 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-brand-600 dark:text-brand-400 border border-brand-500/30 rounded-lg hover:bg-brand-500/10 transition-colors"
                   >
                     <FileUp size={14} /> Import .md
                   </button>
 
-                  <div className="flex border border-slate-600 rounded-lg overflow-hidden shrink-0">
+                  <div className="flex border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden shrink-0 transition-colors">
                     <button type="button" onClick={() => togglePreview(false)}
-                      className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${!previewMode ? 'bg-brand-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                      className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${!previewMode ? 'bg-brand-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
                       <Code2 size={14} /> Editor
                     </button>
                     <button type="button" onClick={() => togglePreview(true)}
-                      className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${previewMode ? 'bg-brand-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                      className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${previewMode ? 'bg-brand-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
                       <Eye size={14} /> Preview
                     </button>
                   </div>
@@ -528,39 +528,39 @@ export default function AdminArticleEditor() {
               </div>
 
               {!previewMode && (
-                <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-800/50 border-x border-t border-slate-700/50 rounded-t-xl overflow-x-auto no-scrollbar">
-                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
-                    <button type="button" onClick={() => insertMarkdown('**', '**', 'teks-tebal')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Bold"><Bold size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('*', '*', 'teks-miring')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Italic"><Italic size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('`', '`', 'kode')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Inline Code"><Code size={16} /></button>
+                <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 dark:bg-slate-800/50 border-x border-t border-slate-200 dark:border-slate-700/50 rounded-t-xl overflow-x-auto no-scrollbar transition-colors">
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-200 dark:border-slate-700/50 transition-colors">
+                    <button type="button" onClick={() => insertMarkdown('**', '**', 'teks-tebal')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Bold"><Bold size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('*', '*', 'teks-miring')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Italic"><Italic size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('`', '`', 'kode')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Inline Code"><Code size={16} /></button>
                   </div>
                   
-                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
-                    <button type="button" onClick={() => insertMarkdown('# ', '', 'Judul 1', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Heading 1"><Heading1 size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('## ', '', 'Judul 2', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Heading 2"><Heading2 size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('### ', '', 'Judul 3', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Heading 3"><Heading3 size={16} /></button>
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-200 dark:border-slate-700/50 transition-colors">
+                    <button type="button" onClick={() => insertMarkdown('# ', '', 'Judul 1', true)} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Heading 1"><Heading1 size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('## ', '', 'Judul 2', true)} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Heading 2"><Heading2 size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('### ', '', 'Judul 3', true)} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Heading 3"><Heading3 size={16} /></button>
                   </div>
 
-                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
-                    <button type="button" onClick={() => insertMarkdown('- ', '', 'Item daftar', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Bullet List"><List size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('1. ', '', 'Item daftar', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Numbered List"><ListOrdered size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('- [ ] ', '', 'Tugas', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Checklist"><CheckSquare size={16} /></button>
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-200 dark:border-slate-700/50 transition-colors">
+                    <button type="button" onClick={() => insertMarkdown('- ', '', 'Item daftar', true)} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Bullet List"><List size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('1. ', '', 'Item daftar', true)} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Numbered List"><ListOrdered size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('- [ ] ', '', 'Tugas', true)} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Checklist"><CheckSquare size={16} /></button>
                   </div>
 
-                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
-                    <button type="button" onClick={() => insertMarkdown('> ', '', 'Kutipan', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Quote"><Quote size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('[', '](https://)', 'Teks link')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Link"><LinkIcon size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('\n---\n', '')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Horizontal Rule"><Minus size={16} /></button>
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-200 dark:border-slate-700/50 transition-colors">
+                    <button type="button" onClick={() => insertMarkdown('> ', '', 'Kutipan', true)} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Quote"><Quote size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('[', '](https://)', 'Teks link')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Link"><LinkIcon size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('\n---\n', '')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Horizontal Rule"><Minus size={16} /></button>
                   </div>
 
-                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
-                    <button type="button" onClick={() => insertMarkdown('\n:::callout\n', '\n:::\n', 'Tulis pesan callout di sini...')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Callout Box"><MessageSquare size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('\n<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">\n<div>\n', '\n</div>\n<div>\nKonten kolom 2\n</div>\n</div>\n', 'Konten kolom 1')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="2 Columns Layout"><Columns size={16} /></button>
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-200 dark:border-slate-700/50 transition-colors">
+                    <button type="button" onClick={() => insertMarkdown('\n:::callout\n', '\n:::\n', 'Tulis pesan callout di sini...')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Callout Box"><MessageSquare size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('\n<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">\n<div>\n', '\n</div>\n<div>\nKonten kolom 2\n</div>\n</div>\n', 'Konten kolom 1')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="2 Columns Layout"><Columns size={16} /></button>
                   </div>
 
-                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
-                    <button type="button" onClick={() => insertMarkdown('\n<div dir="ltr">\n\n', '\n\n</div>\n', 'Teks LTR')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Left to Right (LTR)"><AlignLeft size={16} /></button>
-                    <button type="button" onClick={() => insertMarkdown('\n<div dir="rtl">\n\n', '\n\n</div>\n', 'Teks RTL')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Right to Left (RTL)"><AlignRight size={16} /></button>
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-200 dark:border-slate-700/50 transition-colors">
+                    <button type="button" onClick={() => insertMarkdown('\n<div dir="ltr">\n\n', '\n\n</div>\n', 'Teks LTR')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Left to Right (LTR)"><AlignLeft size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('\n<div dir="rtl">\n\n', '\n\n</div>\n', 'Teks RTL')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Right to Left (RTL)"><AlignRight size={16} /></button>
                   </div>
 
                   <div className="flex items-center gap-1 ml-auto">
@@ -568,7 +568,7 @@ export default function AdminArticleEditor() {
                       type="button" 
                       onClick={handleUndo} 
                       disabled={historyIndex <= 0}
-                      className={`p-1.5 rounded ${historyIndex <= 0 ? 'text-slate-600' : 'hover:bg-slate-700 text-slate-300'}`} 
+                      className={`p-1.5 rounded transition-colors ${historyIndex <= 0 ? 'text-slate-300 dark:text-slate-600' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`} 
                       title="Undo (Ctrl+Z)"
                     >
                       <Undo2 size={16} />
@@ -577,7 +577,7 @@ export default function AdminArticleEditor() {
                       type="button" 
                       onClick={handleRedo} 
                       disabled={historyIndex >= history.length - 1}
-                      className={`p-1.5 rounded ${historyIndex >= history.length - 1 ? 'text-slate-600' : 'hover:bg-slate-700 text-slate-300'}`} 
+                      className={`p-1.5 rounded transition-colors ${historyIndex >= history.length - 1 ? 'text-slate-300 dark:text-slate-600' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'}`} 
                       title="Redo (Ctrl+Y)"
                     >
                       <Redo2 size={16} />
@@ -589,9 +589,11 @@ export default function AdminArticleEditor() {
               {previewMode ? (
                 <div 
                   ref={previewRef}
-                  className="h-[600px] overflow-y-auto bg-dark-800/50 border border-slate-700/50 rounded-b-xl p-8 prose prose-invert prose-lg max-w-none
-                  prose-headings:text-white prose-p:text-slate-300 prose-a:text-brand-400 prose-code:text-accent-300
-                  prose-code:bg-dark-900 prose-pre:bg-dark-900 prose-blockquote:border-brand-500 prose-li:text-slate-300 shadow-inner">
+                  className="h-[600px] overflow-y-auto bg-slate-50 dark:bg-dark-800/50 border border-slate-200 dark:border-slate-700/50 rounded-b-xl p-8 prose dark:prose-invert prose-lg max-w-none transition-colors
+                  prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-slate-300 
+                  prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-code:text-accent-600 dark:prose-code:text-accent-300
+                  prose-code:bg-slate-100 dark:prose-code:bg-dark-900 prose-pre:bg-slate-100 dark:prose-pre:bg-dark-900 
+                  prose-blockquote:border-brand-500 prose-li:text-slate-700 dark:prose-li:text-slate-300 shadow-inner">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{contentVal || '*Konten kosong. Silakan tulis sesuatu...*'}</ReactMarkdown>
                 </div>
               ) : (
@@ -608,11 +610,11 @@ export default function AdminArticleEditor() {
             </div>
 
             {/* Content Image Manager */}
-            <div className="bg-slate-800/30 rounded-xl border border-slate-700/50 overflow-hidden">
-              <div className="p-4 border-b border-slate-700/50 bg-slate-800/50 flex items-center justify-between">
+            <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden transition-colors">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-700/50 bg-slate-100 dark:bg-slate-800/50 flex items-center justify-between transition-colors">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Manager Gambar Konten</h3>
-                  <p className="text-xs text-slate-500">Upload gambar untuk digunakan dalam isi artikel</p>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white transition-colors">Manager Gambar Konten</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors">Upload gambar untuk digunakan dalam isi artikel</p>
                 </div>
                 <div>
                   <input 
@@ -637,7 +639,7 @@ export default function AdminArticleEditor() {
 
               <div className="p-4">
                 {contentImages.length === 0 ? (
-                  <div className="py-8 text-center text-slate-500 text-sm italic">
+                  <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-sm italic transition-colors">
                     Belum ada gambar konten yang diupload
                   </div>
                 ) : (
@@ -645,7 +647,7 @@ export default function AdminArticleEditor() {
                     {contentImages.map((img, idx) => {
                       const mdCode = `![${img.name}](${img.url})`
                       return (
-                        <div key={idx} className="relative group aspect-square rounded-lg border border-slate-700 overflow-hidden bg-dark-900">
+                        <div key={idx} className="relative group aspect-square rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-dark-900 transition-colors">
                           <img src={img.url} alt={img.name} className="w-full h-full object-cover" title={img.name} />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 gap-2 text-center text-[10px]">
                             <button 
@@ -672,15 +674,15 @@ export default function AdminArticleEditor() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-slate-800/20 rounded-xl border border-slate-700/50">
+            <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/20 rounded-xl border border-slate-200 dark:border-slate-700/50 transition-colors">
               <input type="checkbox" id="published" className="w-5 h-5 rounded accent-brand-500 cursor-pointer" {...register('published')} />
               <div className="cursor-pointer" onClick={() => setValue('published', !watch('published'))}>
-                <label htmlFor="published" className="text-sm font-medium text-white cursor-pointer block">Publikasikan Artikel</label>
-                <p className="text-xs text-slate-400">Jika aktif, artikel akan langsung terlihat oleh pengunjung website.</p>
+                <label htmlFor="published" className="text-sm font-medium text-slate-900 dark:text-white cursor-pointer block transition-colors">Publikasikan Artikel</label>
+                <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">Jika aktif, artikel akan langsung terlihat oleh pengunjung website.</p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-6 border-t border-slate-700/50">
+            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200 dark:border-slate-700/50 transition-colors">
               <Link to="/admin/articles" className="btn-secondary px-6">Batal</Link>
               <button type="submit" disabled={saving} className="btn-primary px-8 flex items-center gap-2">
                 {saving ? <><Loader2 size={18} className="animate-spin" /> Menyimpan...</> : <><Save size={18} /> Simpan Perubahan</>}
