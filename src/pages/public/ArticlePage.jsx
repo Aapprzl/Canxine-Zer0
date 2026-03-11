@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabaseClient'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import { ChevronRight, Home, User, Calendar, ArrowLeft } from 'lucide-react'
 
 function formatDate(dateStr) {
@@ -103,7 +104,7 @@ export default function ArticlePage() {
         prose-strong:text-white prose-li:text-slate-300 prose-hr:border-slate-700
         prose-table:text-slate-300 prose-th:border-slate-700 prose-td:border-slate-700
       ">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
           {article.content || ''}
         </ReactMarkdown>
       </article>

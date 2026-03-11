@@ -35,9 +35,51 @@ export default function AdminArticles() {
   const totalPages = Math.ceil(totalCount / PER_PAGE)
 
   const handleDelete = async () => {
-    await supabase.from('articles').delete().eq('id', deleteTarget.id)
-    setDeleteTarget(null)
-    fetchArticles(currentPage)
+    if (!deleteTarget) return
+
+    try {
+      // 1. Get all images to delete (main + content images)
+      let filesToDelete = []
+      
+      // Main image
+      if (deleteTarget.image_url) {
+        const mainPathMatch = deleteTarget.image_url.split('article-images/')
+        if (mainPathMatch.length > 1) filesToDelete.push(mainPathMatch[1])
+      }
+
+      // Content images (from hidden metadata)
+      if (deleteTarget.content) {
+        const metaMatch = deleteTarget.content.match(/<!-- CONTENT_IMAGES: (.*) -->/)
+        if (metaMatch) {
+          try {
+            const contentImages = JSON.parse(metaMatch[1])
+            contentImages.forEach(img => {
+              const contentPathMatch = img.url.split('article-images/')
+              if (contentPathMatch.length > 1) filesToDelete.push(contentPathMatch[1])
+            })
+          } catch (e) {
+            console.error('Error parsing content images for cleanup', e)
+          }
+        }
+      }
+
+      // 2. Delete from storage if there are files
+      if (filesToDelete.length > 0) {
+        await supabase.storage.from('article-images').remove(filesToDelete)
+      }
+
+      // 3. Delete from database
+      await supabase.from('articles').delete().eq('id', deleteTarget.id)
+      
+      setDeleteTarget(null)
+      fetchArticles(currentPage)
+    } catch (err) {
+      console.error('Failed to delete article and its storage:', err)
+      // Fallback: still delete DB entry if storage fails
+      await supabase.from('articles').delete().eq('id', deleteTarget.id)
+      setDeleteTarget(null)
+      fetchArticles(currentPage)
+    }
   }
 
   return (

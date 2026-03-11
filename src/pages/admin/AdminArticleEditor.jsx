@@ -4,7 +4,13 @@ import { supabase } from '../../lib/supabaseClient'
 import { useForm } from 'react-hook-form'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { ArrowLeft, Save, Eye, Code2, ImagePlus, Loader2, X, FileUp, Copy, Check, UploadCloud } from 'lucide-react'
+import rehypeRaw from 'rehype-raw'
+import { 
+  ArrowLeft, Save, Eye, Code2, ImagePlus, Loader2, X, FileUp, Copy, Check, UploadCloud,
+  Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare, 
+  Quote, Minus, Type, Link as LinkIcon, Code, Columns, Square, MessageSquare,
+  Undo2, Redo2, AlignLeft, AlignRight
+} from 'lucide-react'
 
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
@@ -25,10 +31,17 @@ export default function AdminArticleEditor() {
   const fileInputRef = useRef()
   const contentImagesRef = useRef()
   const mdInputRef = useRef()
+  const textareaRef = useRef()
+  const previewRef = useRef()
 
   const [contentImages, setContentImages] = useState([])
   const [uploadingContent, setUploadingContent] = useState(false)
   const [copiedIndex, setCopiedIndex] = useState(null)
+  const [scrollPercentage, setScrollPercentage] = useState(0)
+  
+  // History for Undo/Redo
+  const [history, setHistory] = useState([])
+  const [historyIndex, setHistoryIndex] = useState(-1)
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -62,10 +75,24 @@ export default function AdminArticleEditor() {
     if (error) {
       setServerError('Gagal memuat artikel: ' + error.message)
     } else if (data) {
+      let cleanContent = data.content || ''
+      let loadedImages = []
+
+      // Extract hidden metadata: <!-- CONTENT_IMAGES: [...] -->
+      const metaMatch = cleanContent.match(/<!-- CONTENT_IMAGES: (.*) -->/)
+      if (metaMatch) {
+        try {
+          loadedImages = JSON.parse(metaMatch[1])
+          cleanContent = cleanContent.replace(metaMatch[0], '').trim()
+        } catch (e) {
+          console.error('Failed to parse content images metadata', e)
+        }
+      }
+
       reset({
         title: data.title,
         slug: data.slug,
-        content: data.content || '',
+        content: cleanContent,
         topic_id: data.topic_id,
         author: data.author || '',
         published: data.published,
@@ -73,6 +100,7 @@ export default function AdminArticleEditor() {
         description: data.description || ''
       })
       setImgPreviewUrl(data.image_url || '')
+      setContentImages(loadedImages)
     }
     setLoading(false)
   }
@@ -138,6 +166,168 @@ export default function AdminArticleEditor() {
     setTimeout(() => setCopiedIndex(null), 2000)
   }
 
+  const handleDeleteContentImage = async (img, idx) => {
+    // Extract relative path from URL
+    // URL format: https://.../storage/v1/object/public/article-images/content-img/filename.jpg
+    const urlParts = img.url.split('article-images/')
+    if (urlParts.length > 1) {
+      const filePath = urlParts[1]
+      await supabase.storage.from('article-images').remove([filePath])
+    }
+    
+    // Update state
+    setContentImages(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  const insertMarkdown = (prefix, suffix = '', placeholder = '', isBlock = false) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const scrollPos = textarea.scrollTop
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const text = textarea.value
+    const selection = text.substring(start, end)
+    
+    let newValue = ''
+    let newCursorPos = start
+
+    if (isBlock) {
+      // Block-level logic (Headings, Lists, Quotes)
+      const lines = selection.split('\n')
+      const isHeader = prefix.startsWith('#')
+      
+      // Check if ALREADY has this specific prefix on FIRST line
+      const hasPrefix = lines[0].startsWith(prefix)
+      
+      // Special case for headings: if it has ANY heading prefix, we might want to toggle or replace
+      const existingHeadingMatch = lines[0].match(/^(#+ )/)
+      
+      if (hasPrefix) {
+        // Toggle OFF: Remove prefix from all lines
+        const processedLines = lines.map(line => line.startsWith(prefix) ? line.substring(prefix.length) : line)
+        newValue = text.substring(0, start) + processedLines.join('\n') + text.substring(end)
+        newCursorPos = start + processedLines.join('\n').length
+      } else if (isHeader && existingHeadingMatch) {
+          // Replace existing header with new header level
+          const processedLines = lines.map(line => {
+            const match = line.match(/^(#+ )/)
+            return match ? prefix + line.substring(match[0].length) : prefix + line
+          })
+          newValue = text.substring(0, start) + processedLines.join('\n') + text.substring(end)
+          newCursorPos = start + processedLines.join('\n').length
+      } else {
+        // Toggle ON: Add prefix to all lines
+        const processedLines = lines.map(line => prefix + (line || placeholder))
+        newValue = text.substring(0, start) + processedLines.join('\n') + text.substring(end)
+        newCursorPos = start + processedLines.join('\n').length
+      }
+    } else {
+      // Inline-level logic (Bold, Italic, Code, Link)
+      // Toggle logic: If selection is already wrapped with THIS prefix/suffix, remove it
+      if (selection.startsWith(prefix) && selection.endsWith(suffix) && selection !== '') {
+        const unwrapped = selection.substring(prefix.length, selection.length - suffix.length)
+        newValue = text.substring(0, start) + unwrapped + text.substring(end)
+        newCursorPos = start + unwrapped.length
+      } 
+      // Special case for empty selection but wrapped (cursor inside)
+      else if (selection === '' && text.substring(start - prefix.length, start) === prefix && text.substring(end, end + suffix.length) === suffix) {
+        newValue = text.substring(0, start - prefix.length) + text.substring(end + suffix.length)
+        newCursorPos = start - prefix.length
+      }
+      // Standard wrap
+      else {
+        const replacement = selection || placeholder
+        newValue = text.substring(0, start) + prefix + replacement + suffix + text.substring(end)
+        newCursorPos = start + prefix.length + replacement.length + suffix.length
+      }
+    }
+
+    setValue('content', newValue)
+    
+    // Add to history
+    const newHistory = history.slice(0, historyIndex + 1)
+    newHistory.push(newValue)
+    if (newHistory.length > 50) newHistory.shift()
+    setHistory(newHistory)
+    setHistoryIndex(newHistory.length - 1)
+    
+    // Focus back and set cursor
+    setTimeout(() => {
+      textarea.focus()
+      textarea.setSelectionRange(newCursorPos, newCursorPos)
+      textarea.scrollTop = scrollPos
+    }, 10)
+  }
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      const nextIndex = historyIndex - 1
+      setValue('content', history[nextIndex])
+      setHistoryIndex(nextIndex)
+    }
+  }
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const nextIndex = historyIndex + 1
+      setValue('content', history[nextIndex])
+      setHistoryIndex(nextIndex)
+    }
+  }
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault()
+        handleUndo()
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault()
+        handleRedo()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [historyIndex, history])
+
+  // Initial history
+  useEffect(() => {
+    if (contentVal && history.length === 0) {
+      setHistory([contentVal])
+      setHistoryIndex(0)
+    }
+  }, [contentVal, history.length])
+
+  // Scroll Sync Logic
+  const togglePreview = (showPreview) => {
+    if (showPreview === previewMode) return
+
+    // Calculate current scroll percentage
+    const el = !previewMode ? textareaRef.current : previewRef.current
+    if (el) {
+      const maxScroll = el.scrollHeight - el.clientHeight
+      const percentage = maxScroll > 0 ? el.scrollTop / maxScroll : 0
+      setScrollPercentage(percentage)
+    }
+    
+    setPreviewMode(showPreview)
+  }
+
+  useEffect(() => {
+    // Restore scroll position after mode switch using percentage
+    const el = previewMode ? previewRef.current : textareaRef.current
+    
+    if (el) {
+      // Small timeout to allow content to render (important for Preview)
+      const timer = setTimeout(() => {
+        const maxScroll = el.scrollHeight - el.clientHeight
+        el.scrollTop = scrollPercentage * maxScroll
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [previewMode, scrollPercentage, contentVal])
+
   const handleMarkdownImport = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -155,10 +345,17 @@ export default function AdminArticleEditor() {
   const onSubmit = async (values) => {
     setSaving(true)
     setServerError('')
+    
+    // Append hidden metadata for content images
+    let finalContent = values.content || ''
+    if (contentImages.length > 0) {
+      finalContent += `\n\n<!-- CONTENT_IMAGES: ${JSON.stringify(contentImages)} -->`
+    }
+
     const payload = {
       title: values.title,
       slug: values.slug,
-      content: values.content || null,
+      content: finalContent,
       topic_id: parseInt(values.topic_id),
       author: values.author || null,
       image_url: values.image_url || null,
@@ -318,11 +515,11 @@ export default function AdminArticleEditor() {
                   </button>
 
                   <div className="flex border border-slate-600 rounded-lg overflow-hidden shrink-0">
-                    <button type="button" onClick={() => setPreviewMode(false)}
+                    <button type="button" onClick={() => togglePreview(false)}
                       className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${!previewMode ? 'bg-brand-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                       <Code2 size={14} /> Editor
                     </button>
-                    <button type="button" onClick={() => setPreviewMode(true)}
+                    <button type="button" onClick={() => togglePreview(true)}
                       className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${previewMode ? 'bg-brand-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                       <Eye size={14} /> Preview
                     </button>
@@ -330,17 +527,82 @@ export default function AdminArticleEditor() {
                 </div>
               </div>
 
+              {!previewMode && (
+                <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-800/50 border-x border-t border-slate-700/50 rounded-t-xl overflow-x-auto no-scrollbar">
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
+                    <button type="button" onClick={() => insertMarkdown('**', '**', 'teks-tebal')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Bold"><Bold size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('*', '*', 'teks-miring')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Italic"><Italic size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('`', '`', 'kode')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Inline Code"><Code size={16} /></button>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
+                    <button type="button" onClick={() => insertMarkdown('# ', '', 'Judul 1', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Heading 1"><Heading1 size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('## ', '', 'Judul 2', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Heading 2"><Heading2 size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('### ', '', 'Judul 3', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Heading 3"><Heading3 size={16} /></button>
+                  </div>
+
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
+                    <button type="button" onClick={() => insertMarkdown('- ', '', 'Item daftar', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Bullet List"><List size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('1. ', '', 'Item daftar', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Numbered List"><ListOrdered size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('- [ ] ', '', 'Tugas', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Checklist"><CheckSquare size={16} /></button>
+                  </div>
+
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
+                    <button type="button" onClick={() => insertMarkdown('> ', '', 'Kutipan', true)} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Quote"><Quote size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('[', '](https://)', 'Teks link')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Link"><LinkIcon size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('\n---\n', '')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Horizontal Rule"><Minus size={16} /></button>
+                  </div>
+
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
+                    <button type="button" onClick={() => insertMarkdown('\n:::callout\n', '\n:::\n', 'Tulis pesan callout di sini...')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Callout Box"><MessageSquare size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('\n<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">\n<div>\n', '\n</div>\n<div>\nKonten kolom 2\n</div>\n</div>\n', 'Konten kolom 1')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="2 Columns Layout"><Columns size={16} /></button>
+                  </div>
+
+                  <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-700/50">
+                    <button type="button" onClick={() => insertMarkdown('\n<div dir="ltr">\n\n', '\n\n</div>\n', 'Teks LTR')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Left to Right (LTR)"><AlignLeft size={16} /></button>
+                    <button type="button" onClick={() => insertMarkdown('\n<div dir="rtl">\n\n', '\n\n</div>\n', 'Teks RTL')} className="p-1.5 rounded hover:bg-slate-700 text-slate-300" title="Right to Left (RTL)"><AlignRight size={16} /></button>
+                  </div>
+
+                  <div className="flex items-center gap-1 ml-auto">
+                    <button 
+                      type="button" 
+                      onClick={handleUndo} 
+                      disabled={historyIndex <= 0}
+                      className={`p-1.5 rounded ${historyIndex <= 0 ? 'text-slate-600' : 'hover:bg-slate-700 text-slate-300'}`} 
+                      title="Undo (Ctrl+Z)"
+                    >
+                      <Undo2 size={16} />
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handleRedo} 
+                      disabled={historyIndex >= history.length - 1}
+                      className={`p-1.5 rounded ${historyIndex >= history.length - 1 ? 'text-slate-600' : 'hover:bg-slate-700 text-slate-300'}`} 
+                      title="Redo (Ctrl+Y)"
+                    >
+                      <Redo2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {previewMode ? (
-                <div className="h-[600px] overflow-y-auto bg-dark-800/50 border border-slate-700/50 rounded-xl p-8 prose prose-invert prose-lg max-w-none
+                <div 
+                  ref={previewRef}
+                  className="h-[600px] overflow-y-auto bg-dark-800/50 border border-slate-700/50 rounded-b-xl p-8 prose prose-invert prose-lg max-w-none
                   prose-headings:text-white prose-p:text-slate-300 prose-a:text-brand-400 prose-code:text-accent-300
                   prose-code:bg-dark-900 prose-pre:bg-dark-900 prose-blockquote:border-brand-500 prose-li:text-slate-300 shadow-inner">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentVal || '*Konten kosong. Silakan tulis sesuatu...*'}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{contentVal || '*Konten kosong. Silakan tulis sesuatu...*'}</ReactMarkdown>
                 </div>
               ) : (
                 <textarea
-                  className="input-field resize-none font-mono text-sm h-[600px] p-6"
+                  className="input-field rounded-t-none resize-none font-mono text-sm h-[600px] p-6"
                   placeholder="# Judul Artikel&#10;&#10;Tulis isi artikel Anda dengan format Markdown di sini...&#10;&#10;Gunakan toolbar di atas untuk melihat preview."
                   {...register('content')}
+                  ref={(e) => {
+                    register('content').ref(e)
+                    textareaRef.current = e
+                  }}
                 />
               )}
             </div>
@@ -396,7 +658,7 @@ export default function AdminArticleEditor() {
                             </button>
                             <button 
                               type="button"
-                              onClick={() => setContentImages(prev => prev.filter((_, i) => i !== idx))}
+                              onClick={() => handleDeleteContentImage(img, idx)}
                               className="text-red-400 hover:text-red-300"
                             >
                               Hapus

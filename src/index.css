@@ -27,6 +27,12 @@
     font-family: "Plus Jakarta Sans", "Noto Sans Arabic", Inter, sans-serif !important;
   }
 
+  /* Remove default backticks from inline code in tailwind typography */
+  .prose code::before,
+  .prose code::after {
+    content: "" !important;
+  }
+
   /* Arabic font is handled via fallback in tailwind.config.js sans stack */
 
   ::selection {
