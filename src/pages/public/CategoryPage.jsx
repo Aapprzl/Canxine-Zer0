@@ -30,7 +30,21 @@ export default function CategoryPage() {
       }
       setLoading(false)
     }
+
     fetchData()
+
+    // Realtime subscription for topics
+    const channel = supabase
+      .channel('realtime category-topics')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'topics' }, 
+        () => {
+          fetchData() // Refetch when topics change
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
   }, [slug])
 
   if (loading) return <LoadingSpinner />

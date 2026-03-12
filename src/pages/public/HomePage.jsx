@@ -42,7 +42,21 @@ export default function HomePage() {
       
       setLoading(false)
     }
+
     fetchData()
+
+    // Realtime subscription for categories
+    const channel = supabase
+      .channel('realtime home-categories')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'categories' }, 
+        () => {
+          fetchData() // Refetch when categories change
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
   }, [])
 
   if (loading) return <LoadingSpinner />

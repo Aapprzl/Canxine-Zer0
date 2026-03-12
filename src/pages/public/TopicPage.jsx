@@ -53,7 +53,21 @@ export default function TopicPage() {
       setArticles(data || [])
       setTotalCount(count || 0)
     }
+
     fetchArticles()
+
+    // Realtime subscription for articles
+    const channel = supabase
+      .channel('realtime topic-articles')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'articles' }, 
+        () => {
+          fetchArticles() // Refetch when articles change
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
   }, [topic, currentPage])
 
   const totalPages = Math.ceil(totalCount / PER_PAGE)
