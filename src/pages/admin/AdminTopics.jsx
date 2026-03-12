@@ -117,7 +117,7 @@ export default function AdminTopics() {
                 <tr key={t.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/20 transition-colors">
                   <td className="table-td font-medium text-slate-900 dark:text-white transition-colors">{t.name}</td>
                   <td className="table-td transition-colors">
-                    <code className="text-xs text-accent-600 dark:text-accent-300 bg-slate-100 dark:bg-dark-700 px-2 py-0.5 rounded transition-colors">
+                    <code className="text-xs text-accent-600 dark:text-accent-400 bg-slate-100 dark:bg-dark-700 px-2 py-0.5 rounded transition-colors">
                       {t.slug}
                     </code>
                   </td>

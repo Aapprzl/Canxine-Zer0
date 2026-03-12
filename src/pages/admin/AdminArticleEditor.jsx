@@ -877,14 +877,15 @@ useEffect(() => {
                 </div>
               )}
 
-              {previewMode ? (
+{previewMode ? (
                 <div 
                   ref={previewRef}
                   className="h-[600px] overflow-y-auto bg-slate-50 dark:bg-dark-800/50 border border-slate-200 dark:border-slate-700/50 rounded-b-xl p-8 prose dark:prose-invert prose-lg max-w-none transition-colors
-                  prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-slate-300 
-                  prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-code:text-accent-600 dark:prose-code:text-accent-300
+                  prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-white 
+                  prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-code:text-accent-600 dark:prose-code:text-accent-400
                   prose-code:bg-slate-100 dark:prose-code:bg-dark-900 prose-pre:bg-slate-100 dark:prose-pre:bg-dark-900 
-                  prose-blockquote:border-brand-500 prose-li:text-slate-700 dark:prose-li:text-slate-300 shadow-inner">
+                  prose-blockquote:border-brand-500 prose-li:text-slate-700 dark:prose-li:text-slate-300 shadow-inner"
+                  dir="auto">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{contentVal || '*Konten kosong. Silakan tulis sesuatu...*'}</ReactMarkdown>
                 </div>
               ) : (
