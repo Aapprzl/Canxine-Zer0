@@ -64,19 +64,19 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-white dark:bg-dark-900 pt-16 pb-20 transition-colors duration-300">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 dark:from-brand-900/30 via-white dark:via-dark-900 to-slate-200/50 dark:to-accent-600/10 pointer-events-none" />
+      <section className="relative overflow-hidden bg-[var(--bg-secondary)] dark:bg-dark-900 pt-16 pb-20 transition-colors duration-300">
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="page-container relative text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-600 dark:text-brand-300 text-sm font-medium mb-6">
             <Sparkles size={14} />
             {settings.hero_badge}
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-5 leading-tight tracking-tight transition-colors">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-[var(--text-primary)] dark:text-white mb-5 leading-tight tracking-tight transition-colors">
             {settings.hero_title}{' '}
             <span className="text-gradient">{settings.hero_title_highlight}</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed transition-colors">
+          <p className="text-lg md:text-xl text-[var(--text-secondary)] dark:text-slate-400 max-w-2xl mx-auto leading-relaxed transition-colors">
             {settings.hero_subtitle}
           </p>
         </div>
@@ -87,7 +87,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="section-title">Kategori</h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-1 transition-colors">Pilih kategori untuk mulai belajar</p>
+            <p className="text-[var(--text-secondary)] mt-1 transition-colors">Pilih kategori untuk mulai belajar</p>
           </div>
           {categories.length > 0 && (
             <span className="badge badge-gray">{categories.length} kategori</span>
@@ -102,8 +102,8 @@ export default function HomePage() {
 
         {!loading && !error && categories.length === 0 && (
           <div className="glass-card p-12 text-center">
-            <p className="text-slate-600 dark:text-slate-400 text-lg transition-colors">Belum ada kategori.</p>
-            <p className="text-slate-500 dark:text-slate-500 text-sm mt-2 transition-colors">admin dapat menambahkan kategori dari panel admin.</p>
+            <p className="text-[var(--text-secondary)] text-lg transition-colors">Belum ada kategori.</p>
+            <p className="text-[var(--text-secondary)] opacity-70 text-sm mt-2 transition-colors">admin dapat menambahkan kategori dari panel admin.</p>
           </div>
         )}
 
