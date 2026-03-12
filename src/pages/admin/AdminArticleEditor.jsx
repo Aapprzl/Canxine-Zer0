@@ -423,7 +423,7 @@ useEffect(() => {
     setPreviewMode(showPreview)
   }
 
-  useEffect(() => {
+useEffect(() => {
     // Restore scroll position after mode switch using percentage
     const el = previewMode ? previewRef.current : textareaRef.current
     
@@ -435,7 +435,7 @@ useEffect(() => {
       }, 50)
       return () => clearTimeout(timer)
     }
-  }, [previewMode, scrollPercentage, contentVal])
+  }, [previewMode, scrollPercentage])
 
   const handleMarkdownImport = (e) => {
     const file = e.target.files?.[0]
@@ -702,6 +702,88 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* Manager Gambar Konten (dipindahkan dari bawah) */}
+            <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden transition-colors">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-700/50 bg-slate-100 dark:bg-slate-800/50 flex items-center justify-between transition-colors">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white transition-colors">Manager Gambar Konten</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors">Upload gambar untuk digunakan dalam isi artikel</p>
+                </div>
+                <div>
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    ref={contentImagesRef} 
+                    className="hidden" 
+                    onChange={handleContentImagesUpload} 
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => contentImagesRef.current?.click()}
+                    disabled={uploadingContent}
+                    className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-2"
+                  >
+                    {uploadingContent ? <Loader2 size={14} className="animate-spin" /> : <UploadCloud size={14} />}
+                    Upload Gambar
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4">
+                {contentImages.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-sm italic transition-colors">
+                    Belum ada gambar konten yang diupload
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                    {contentImages.map((img, idx) => {
+                      const mdCode = `![${img.name}](${img.url})`
+                      return (
+                        <div key={idx} className="relative group aspect-square rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-dark-900 transition-colors">
+                          <img src={img.url} alt={img.name} className="w-full h-full object-cover" title={img.name} />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 gap-2 text-center text-[10px]">
+                            <button 
+                              type="button"
+                              onClick={() => copyToClipboard(mdCode, idx)}
+                              className="w-full btn-primary py-1 px-1 flex items-center justify-center gap-1"
+                            >
+                              {copiedIndex === idx ? <Check size={10} /> : <Copy size={10} />}
+                              {copiedIndex === idx ? 'Copied' : 'Copy MD'}
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => handleDeleteContentImage(img, idx)}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Publikasikan Artikel (dipindahkan dari bawah) */}
+            <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/20 rounded-xl border border-slate-200 dark:border-slate-700/50 transition-colors">
+              <input type="checkbox" id="published" className="w-5 h-5 rounded accent-brand-500 cursor-pointer" {...register('published')} />
+              <div className="cursor-pointer" onClick={() => setValue('published', !watch('published'))}>
+                <label htmlFor="published" className="text-sm font-medium text-slate-900 dark:text-white cursor-pointer block transition-colors">Publikasikan Artikel</label>
+                <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">Jika aktif, artikel akan langsung terlihat oleh pengunjung website.</p>
+              </div>
+            </div>
+
+            {/* Tombol Batal & Simpan (dipindahkan dari bawah) */}
+            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200 dark:border-slate-700/50 transition-colors">
+              <Link to="/admin/articles" className="btn-secondary px-6">Batal</Link>
+              <button type="submit" disabled={saving} className="btn-primary px-8 flex items-center gap-2">
+                {saving ? <><Loader2 size={18} className="animate-spin" /> Menyimpan...</> : <><Save size={18} /> Simpan Perubahan</>}
+              </button>
+            </div>
+
             {/* Content editor + preview toggle */}
             <div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
@@ -816,86 +898,6 @@ useEffect(() => {
                   }}
                 />
               )}
-            </div>
-
-            {/* Content Image Manager */}
-            <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden transition-colors">
-              <div className="p-4 border-b border-slate-200 dark:border-slate-700/50 bg-slate-100 dark:bg-slate-800/50 flex items-center justify-between transition-colors">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white transition-colors">Manager Gambar Konten</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors">Upload gambar untuk digunakan dalam isi artikel</p>
-                </div>
-                <div>
-                  <input 
-                    type="file" 
-                    multiple 
-                    accept="image/*" 
-                    ref={contentImagesRef} 
-                    className="hidden" 
-                    onChange={handleContentImagesUpload} 
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => contentImagesRef.current?.click()}
-                    disabled={uploadingContent}
-                    className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-2"
-                  >
-                    {uploadingContent ? <Loader2 size={14} className="animate-spin" /> : <UploadCloud size={14} />}
-                    Upload Gambar
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-4">
-                {contentImages.length === 0 ? (
-                  <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-sm italic transition-colors">
-                    Belum ada gambar konten yang diupload
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                    {contentImages.map((img, idx) => {
-                      const mdCode = `![${img.name}](${img.url})`
-                      return (
-                        <div key={idx} className="relative group aspect-square rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-dark-900 transition-colors">
-                          <img src={img.url} alt={img.name} className="w-full h-full object-cover" title={img.name} />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 gap-2 text-center text-[10px]">
-                            <button 
-                              type="button"
-                              onClick={() => copyToClipboard(mdCode, idx)}
-                              className="w-full btn-primary py-1 px-1 flex items-center justify-center gap-1"
-                            >
-                              {copiedIndex === idx ? <Check size={10} /> : <Copy size={10} />}
-                              {copiedIndex === idx ? 'Copied' : 'Copy MD'}
-                            </button>
-                            <button 
-                              type="button"
-                              onClick={() => handleDeleteContentImage(img, idx)}
-                              className="text-red-400 hover:text-red-300"
-                            >
-                              Hapus
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/20 rounded-xl border border-slate-200 dark:border-slate-700/50 transition-colors">
-              <input type="checkbox" id="published" className="w-5 h-5 rounded accent-brand-500 cursor-pointer" {...register('published')} />
-              <div className="cursor-pointer" onClick={() => setValue('published', !watch('published'))}>
-                <label htmlFor="published" className="text-sm font-medium text-slate-900 dark:text-white cursor-pointer block transition-colors">Publikasikan Artikel</label>
-                <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">Jika aktif, artikel akan langsung terlihat oleh pengunjung website.</p>
-              </div>
-            </div>
-
-<div className="flex justify-end gap-4 pt-6 border-t border-slate-200 dark:border-slate-700/50 transition-colors">
-              <Link to="/admin/articles" className="btn-secondary px-6">Batal</Link>
-              <button type="submit" disabled={saving} className="btn-primary px-8 flex items-center gap-2">
-                {saving ? <><Loader2 size={18} className="animate-spin" /> Menyimpan...</> : <><Save size={18} /> Simpan Perubahan</>}
-              </button>
             </div>
           </form>
         </div>
