@@ -5,6 +5,7 @@ import ArticleCard from '../../components/ArticleCard'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import Pagination from '../../components/Pagination'
 import { ChevronRight, Home } from 'lucide-react'
+import * as TablerIcons from '@tabler/icons-react'
 
 const PER_PAGE = 10
 
@@ -87,7 +88,17 @@ export default function TopicPage() {
 
       {/* Header */}
       <div className="mb-10">
-        <h1 className="section-title mb-3 transition-colors">{topic.name}</h1>
+        <div className="flex items-center gap-4 mb-3">
+          {topic.icon && (() => {
+            const IconComponent = TablerIcons[topic.icon] || TablerIcons.IconBookmark
+            return (
+              <div className="w-12 h-12 rounded-xl bg-brand-500/20 flex items-center justify-center">
+                <IconComponent size={24} className="text-brand-400" />
+              </div>
+            )
+          })()}
+          <h1 className="section-title transition-colors">{topic.name}</h1>
+        </div>
         {topic.description && (
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl transition-colors">{topic.description}</p>
         )}

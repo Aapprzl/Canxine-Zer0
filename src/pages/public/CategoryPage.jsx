@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { ChevronRight, BookMarked, Home } from 'lucide-react'
+import * as TablerIcons from '@tabler/icons-react'
 
 export default function CategoryPage() {
   const { slug } = useParams()
@@ -72,7 +73,10 @@ export default function CategoryPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {topics.map(topic => (
+          {topics.map(topic => {
+            const iconName = topic.icon || 'IconBookmark'
+            const IconComponent = TablerIcons[iconName] || TablerIcons.IconBookmark
+            return (
             <Link
               key={topic.id}
               to={`/topik/${topic.slug}`}
@@ -80,7 +84,7 @@ export default function CategoryPage() {
             >
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-xl bg-brand-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <BookMarked size={16} className="text-brand-400" />
+                  <IconComponent size={16} className="text-brand-400" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors mb-1 transition-colors">
@@ -92,7 +96,7 @@ export default function CategoryPage() {
                 </div>
               </div>
             </Link>
-          ))}
+          )})}
         </div>
       )}
     </div>
