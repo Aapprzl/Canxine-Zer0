@@ -3,34 +3,54 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import Pagination from '../../components/Pagination'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Filter, Loader2 } from 'lucide-react'
 
 const PER_PAGE = 10
 
 export default function AdminArticles() {
   const navigate = useNavigate()
   const [articles, setArticles] = useState([])
+  const [topics, setTopics] = useState([])
+  const [selectedTopic, setSelectedTopic] = useState('')
   const [totalCount, setTotalCount] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
+  const fetchTopics = async () => {
+    const { data } = await supabase.from('topics').select('id, name, categories(name)').order('name')
+    setTopics(data || [])
+  }
+
   const fetchArticles = async (page = 1) => {
+    setLoading(true)
     const from = (page - 1) * PER_PAGE
     const to = from + PER_PAGE - 1
-    const { data, count } = await supabase
+    
+    let query = supabase
       .from('articles')
       .select('*, topics(name)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, to)
+    
+    // Apply topic filter if selected
+    if (selectedTopic) {
+      query = query.eq('topic_id', parseInt(selectedTopic))
+    }
+    
+    const { data, count } = await query
     setArticles(data || [])
     setTotalCount(count || 0)
     setLoading(false)
   }
 
   useEffect(() => {
+    fetchTopics()
+  }, [])
+
+  useEffect(() => {
     fetchArticles(currentPage)
-  }, [currentPage])
+  }, [currentPage, selectedTopic])
 
   const totalPages = Math.ceil(totalCount / PER_PAGE)
 
@@ -82,9 +102,10 @@ export default function AdminArticles() {
     }
   }
 
-  return (
+return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+      {/* Filter & Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 transition-colors">Artikel</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Kelola semua artikel pembelajaran</p>
@@ -94,8 +115,38 @@ export default function AdminArticles() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="glass-card overflow-hidden mb-4">
+      {/* Filter Bar */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2">
+          <Filter size={16} className="text-slate-500" />
+          <select
+            value={selectedTopic}
+            onChange={(e) => { setSelectedTopic(e.target.value); setCurrentPage(1) }}
+            className="input-field py-2 text-sm min-w-[200px]"
+          >
+            <option value="">Semua Topik</option>
+            {topics.map(t => (
+              <option key={t.id} value={t.id}>{t.categories?.name} → {t.name}</option>
+            ))}
+          </select>
+        </div>
+        {selectedTopic && (
+          <span className="text-xs text-slate-500 bg-slate-100 dark:bg-dark-700 px-2 py-1 rounded">
+            {totalCount} artikel
+          </span>
+)}
+      </div>
+
+{/* Table */}
+      <div className="glass-card overflow-hidden mb-4 min-h-[300px] relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white/80 dark:bg-dark-800/80 flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 size={32} className="text-brand-500 animate-spin" />
+              <p className="text-sm text-slate-500">Memuat...</p>
+            </div>
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-slate-700/50">
@@ -108,7 +159,6 @@ export default function AdminArticles() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/30">
-              {loading && <tr><td colSpan={5} className="table-td text-center py-12 text-slate-500">Memuat...</td></tr>}
               {!loading && articles.length === 0 && <tr><td colSpan={5} className="table-td text-center py-12 text-slate-500">Belum ada artikel.</td></tr>}
               {articles.map(a => (
                 <tr key={a.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/20 transition-colors">

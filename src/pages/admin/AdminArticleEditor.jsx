@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
+import { useAuth } from '../../contexts/AuthContext'
 import { useForm } from 'react-hook-form'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -18,6 +19,7 @@ function slugify(text) {
 
 export default function AdminArticleEditor() {
   const { id } = useParams()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const isEditing = !!id
 
@@ -26,13 +28,24 @@ export default function AdminArticleEditor() {
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState('')
   const [previewMode, setPreviewMode] = useState(false)
-  const [uploadingImg, setUploadingImg] = useState(false)
+const [uploadingImg, setUploadingImg] = useState(false)
   const [imgPreviewUrl, setImgPreviewUrl] = useState('')
+  
+  // Gallery state
+  const [galleryExpanded, setGalleryExpanded] = useState(false)
+  const [galleryImages, setGalleryImages] = useState([])
+  const [loadingGallery, setLoadingGallery] = useState(false)
+  const [galleryPage, setGalleryPage] = useState(1)
+  const [hasMoreGallery, setHasMoreGallery] = useState(true)
+  const [totalGalleryImages, setTotalGalleryImages] = useState(0)
+  const GALLERY_PAGE_SIZE = 15
+  
   const fileInputRef = useRef()
-  const contentImagesRef = useRef()
+const contentImagesRef = useRef()
   const mdInputRef = useRef()
   const textareaRef = useRef()
   const previewRef = useRef()
+  const galleryRef = useRef()
 
   const [contentImages, setContentImages] = useState([])
   const [uploadingContent, setUploadingContent] = useState(false)
@@ -60,9 +73,103 @@ export default function AdminArticleEditor() {
   const titleVal = watch('title', '')
   const contentVal = watch('content', '')
 
-  const fetchTopics = async () => {
+const fetchTopics = async () => {
     const { data } = await supabase.from('topics').select('id, name, category_id, categories(name)').order('name')
     setTopics(data || [])
+  }
+
+  const fetchGalleryImages = async (page = 1, isLoadMore = false) => {
+    if (loadingGallery) return
+    setLoadingGallery(true)
+    
+    const result = await supabase.storage.from('article-images').list('', { 
+      limit: 100,
+      offset: 0 
+    })
+    
+    let data = result.data
+    let error = result.error
+    
+    if (error) {
+      console.error('Error fetching gallery:', error)
+      setLoadingGallery(false)
+      return
+    }
+    
+    if (!data || data.length === 0) {
+      setGalleryImages([])
+      setHasMoreGallery(false)
+      setLoadingGallery(false)
+      return
+    }
+    
+    const allItems = (data || []).filter(item => {
+      // Only include files directly in root (no slash in name)
+      // Exclude folders and subfolder items like content-img/
+      if (!item.name) return false
+      if (item.name.includes('/')) return false
+      if (item.name.endsWith('/')) return false
+      
+      // Only include image files
+      const ext = item.name.split('.').pop()?.toLowerCase()
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)
+    })
+    
+    // Get existing image names to avoid duplicates
+    const existingNames = new Set(galleryImages.map(img => img.name))
+    
+    const startIndex = (page - 1) * GALLERY_PAGE_SIZE
+    const endIndex = startIndex + GALLERY_PAGE_SIZE
+    const paginatedImages = allItems.slice(startIndex, endIndex)
+    
+    const imagesWithUrls = paginatedImages
+      .filter(item => !existingNames.has(item.name)) // Deduplication
+      .map(item => {
+        const { data: urlData } = supabase.storage.from('article-images').getPublicUrl(item.name)
+        return {
+          name: item.name,
+          url: urlData.publicUrl,
+          created_at: item.created_at
+        }
+      })
+    
+    if (isLoadMore) {
+      setGalleryImages(prev => [...prev, ...imagesWithUrls])
+    } else {
+      setGalleryImages(imagesWithUrls)
+    }
+    
+    const hasMore = endIndex < allItems.length
+    setHasMoreGallery(hasMore)
+    setTotalGalleryImages(allItems.length)
+    setLoadingGallery(false)
+  }
+
+  const openGallery = () => {
+    const willExpand = !galleryExpanded
+    setGalleryExpanded(willExpand)
+    
+    // Fetch images only when expanding for the first time
+    if (willExpand && galleryImages.length === 0) {
+      setGalleryPage(1)
+      setGalleryImages([])
+      setHasMoreGallery(true)
+      fetchGalleryImages(1, false)
+    }
+  }
+
+  const loadMoreGallery = useCallback(() => {
+    if (!loadingGallery && hasMoreGallery) {
+      const nextPage = galleryPage + 1
+      setGalleryPage(nextPage)
+      fetchGalleryImages(nextPage, true)
+    }
+  }, [loadingGallery, hasMoreGallery, galleryPage])
+
+  const selectGalleryImage = (img) => {
+    setValue('image_url', img.url)
+    setImgPreviewUrl(img.url)
+    setGalleryExpanded(false)
   }
 
   const fetchArticle = async () => {
@@ -112,11 +219,11 @@ export default function AdminArticleEditor() {
     if (isEditing) fetchArticle()
   }, [id])
 
-  useEffect(() => {
+useEffect(() => {
     if (!isEditing && titleVal) {
       setValue('slug', slugify(titleVal))
     }
-  }, [titleVal, isEditing, setValue])
+}, [titleVal, isEditing, setValue])
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0]
@@ -463,22 +570,31 @@ export default function AdminArticleEditor() {
               </div>
             </div>
 
-            {/* Image upload */}
+{/* Image upload */}
             <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 transition-colors">
               <label className="label">Gambar Artikel</label>
               <div className="flex items-start gap-6">
-                <div className="flex-1">
-                  <input type="hidden" {...register('image_url')} />
-                  <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
-                  <button 
-                    type="button" 
-                    onClick={() => fileInputRef.current?.click()} 
-                    disabled={uploadingImg} 
-                    className="btn-secondary w-full py-3 flex items-center justify-center gap-2"
-                  >
-                    {uploadingImg ? <><Loader2 size={18} className="animate-spin" /> Mengupload...</> : <><ImagePlus size={18} /> Pilih Gambar Utama</>}
-                  </button>
-                  <p className="text-xs text-slate-500 mt-2 text-center transition-colors">Rekomendasi ukuran: 1200x630px. Maks 5MB.</p>
+                <div className="flex-1 space-y-3">
+                  <div className="flex gap-3">
+                    <input type="hidden" {...register('image_url')} />
+                    <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
+                    <button 
+                      type="button" 
+                      onClick={() => fileInputRef.current?.click()} 
+                      disabled={uploadingImg} 
+                      className="btn-secondary flex-1 py-3 flex items-center justify-center gap-2"
+                    >
+                      {uploadingImg ? <><Loader2 size={18} className="animate-spin" /> Mengupload...</> : <><ImagePlus size={18} /> Upload Baru</>}
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={openGallery}
+                      className="btn-secondary flex-1 py-3 flex items-center justify-center gap-2"
+                    >
+                      <ImagePlus size={18} /> Pilih dari Gallery
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-500 text-center transition-colors">Rekomendasi ukuran: 1200x630px. Maks 5MB.</p>
                   
                   <div className="mt-4">
                     <label className="label text-xs">Sumber Gambar (Opsional)</label>
@@ -488,6 +604,87 @@ export default function AdminArticleEditor() {
                       {...register('image_source')} 
                       placeholder="Contoh: Unsplash, Freepik, Dokumentasi Pribadi..."
                     />
+                  </div>
+
+                  {/* Gallery Expandable Section */}
+                  <div className={`mt-4 overflow-hidden transition-all duration-300 ${galleryExpanded ? 'max-h-[400px]' : 'max-h-0'}`}>
+                    <div className="bg-slate-100 dark:bg-dark-800 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Gallery Gambar</h4>
+                          {totalGalleryImages > 0 && (
+                            <span className="text-xs text-slate-500 bg-slate-200 dark:bg-dark-700 px-2 py-0.5 rounded-full">
+                              {galleryImages.length} / {totalGalleryImages}
+                            </span>
+                          )}
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => setGalleryExpanded(false)}
+                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700"
+                        >
+                          <X size={16} className="text-slate-500" />
+                        </button>
+                      </div>
+                      
+                      <div 
+                        ref={galleryRef}
+                        className="max-h-[300px] overflow-y-auto rounded-lg"
+                      >
+                        {loadingGallery && galleryImages.length === 0 ? (
+                          <div className="py-8 text-center text-slate-500">
+                            <Loader2 size={32} className="mx-auto mb-2 animate-spin" />
+                            <p className="text-sm">Memuat gallery...</p>
+                          </div>
+                        ) : galleryImages.length === 0 ? (
+                          <div className="py-8 text-center text-slate-500">
+                            <ImagePlus size={32} className="mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">Belum ada gambar di gallery</p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                            {galleryImages.map((img, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => selectGalleryImage(img)}
+                                className="relative group aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-brand-500 transition-all"
+                              >
+                                <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <span className="text-white text-xs font-medium">Pilih</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Load More Button */}
+                        {hasMoreGallery && galleryImages.length > 0 && (
+                          <div className="mt-3">
+                            <button
+                              type="button"
+                              onClick={() => loadMoreGallery()}
+                              disabled={loadingGallery}
+                              className="w-full py-2 px-4 bg-slate-200 dark:bg-dark-700 hover:bg-slate-300 dark:hover:bg-dark-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                            >
+                              {loadingGallery ? (
+                                <>
+                                  <Loader2 size={16} className="animate-spin" />
+                                  Memuat...
+                                </>
+                              ) : (
+                                'Muat Lebih Banyak'
+                              )}
+                            </button>
+                          </div>
+                        )}
+                        
+                        {!hasMoreGallery && galleryImages.length > 0 && (
+                          <p className="text-center py-3 text-xs text-slate-500">Semua gambar sudah dimuat</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 {imgPreviewUrl && (
@@ -694,7 +891,7 @@ export default function AdminArticleEditor() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200 dark:border-slate-700/50 transition-colors">
+<div className="flex justify-end gap-4 pt-6 border-t border-slate-200 dark:border-slate-700/50 transition-colors">
               <Link to="/admin/articles" className="btn-secondary px-6">Batal</Link>
               <button type="submit" disabled={saving} className="btn-primary px-8 flex items-center gap-2">
                 {saving ? <><Loader2 size={18} className="animate-spin" /> Menyimpan...</> : <><Save size={18} /> Simpan Perubahan</>}
@@ -703,6 +900,8 @@ export default function AdminArticleEditor() {
           </form>
         </div>
       </div>
+
+
     </div>
   )
 }

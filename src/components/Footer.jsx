@@ -42,14 +42,11 @@ export default function Footer() {
           
           {/* Column 1: Brand & Description (lg:col-span-5) */}
           <div className="lg:col-span-5">
-            <Link to="/" className="flex items-center gap-3 mb-6 inline-flex group/logo">
-              <img src="/logo.svg" alt="Logo" className="w-12 h-12 object-contain transition-transform duration-300 group-hover/logo:scale-110" />
-              <div>
-                <span className="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight transition-colors">
-                  Canxine-Zer0
-                </span>
-              </div>
-            </Link>
+<Link to="/" className="inline-block mb-6 group/logo">
+            <span className="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight transition-colors group-hover/logo:text-brand-500">
+              Canxine-Zer0
+            </span>
+          </Link>
             <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6 max-w-sm transition-colors">
               {settings.footer_description}
             </p>
