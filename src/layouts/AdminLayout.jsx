@@ -63,6 +63,17 @@ export default function AdminLayout() {
               )}
             </NavLink>
           ))}
+
+          {/* Link to public website */}
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-white hover:bg-brand-500/5 dark:hover:bg-slate-700/50"
+          >
+            <BookOpen size={16} className="text-slate-500 group-hover:text-slate-300" />
+            Lihat Website
+          </a>
         </nav>
 
         {/* User & Logout */}
