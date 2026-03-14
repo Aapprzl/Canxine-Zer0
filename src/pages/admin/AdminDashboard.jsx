@@ -39,7 +39,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 transition-colors">Dashboard</h1>
-        <p className="text-slate-500 dark:text-slate-400 transition-colors">Selamat datang kembali, <span className="text-slate-900 dark:text-white font-medium">{user?.email}</span></p>
+        <p className="text-slate-500 dark:text-slate-400 transition-colors">Selamat datang kembali, <span className="text-slate-900 dark:text-white font-medium">Admin Pengguna</span></p>
       </div>
 
       {/* Stats */}

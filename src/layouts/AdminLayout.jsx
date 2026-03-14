@@ -79,7 +79,7 @@ export default function AdminLayout() {
         {/* User & Logout */}
         <div className="p-3 border-t border-slate-700/50">
           <div className="px-3 py-2 mb-2">
-            <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+            <p className="text-xs text-slate-500 truncate">Admin Pengguna</p>
           </div>
           <div className="flex items-center justify-between gap-2">
             <button
