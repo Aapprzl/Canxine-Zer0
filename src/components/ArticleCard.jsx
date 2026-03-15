@@ -11,9 +11,26 @@ function formatDate(dateStr) {
 }
 
 export default function ArticleCard({ article }) {
-  const summary = article.description || (article.content
-    ? article.content.replace(/[#*`>\[\]!]/g, '').slice(0, 100).trim() + '...'
-    : 'Tidak ada deskripsi.')
+  let summary = article.description || ''
+
+  if (summary) {
+    const hasHtmlTags = /<[^>]*>/.test(summary)
+    if (article.content_type === 'html' || hasHtmlTags) {
+      summary = summary.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+    } else {
+      summary = summary.replace(/[#*`>\[\]!-]/g, ' ').replace(/\s+/g, ' ').trim()
+    }
+  } 
+  else if (article.content) {
+    if (article.content_type === 'html') {
+      summary = article.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+    } else {
+      summary = article.content.replace(/[#*`>\[\]!-]/g, ' ').replace(/\s+/g, ' ').trim()
+    }
+  }
+
+  summary = (summary || 'Tidak ada deskripsi.').slice(0, 100).trim()
+  if (summary.length >= 100) summary += '...'
 
   return (
     <Link

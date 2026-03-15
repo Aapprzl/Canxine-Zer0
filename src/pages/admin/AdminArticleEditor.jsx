@@ -10,7 +10,7 @@ import {
   ArrowLeft, Save, Eye, Code2, ImagePlus, Loader2, X, FileUp, Copy, Check, UploadCloud,
   Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare, 
   Quote, Minus, Type, Link as LinkIcon, Code, Columns, Square, MessageSquare,
-  Undo2, Redo2, AlignLeft, AlignRight
+  Undo2, Redo2, AlignLeft, AlignRight, FileCode
 } from 'lucide-react'
 
 function slugify(text) {
@@ -41,8 +41,9 @@ const [uploadingImg, setUploadingImg] = useState(false)
   const GALLERY_PAGE_SIZE = 15
   
   const fileInputRef = useRef()
-const contentImagesRef = useRef()
+  const contentImagesRef = useRef()
   const mdInputRef = useRef()
+  const htmlInputRef = useRef()
   const textareaRef = useRef()
   const previewRef = useRef()
   const galleryRef = useRef()
@@ -61,6 +62,7 @@ const contentImagesRef = useRef()
       title: '',
       slug: '',
       content: '',
+      content_type: 'markdown',
       topic_id: '',
       author: '',
       published: false,
@@ -72,6 +74,7 @@ const contentImagesRef = useRef()
 
   const titleVal = watch('title', '')
   const contentVal = watch('content', '')
+  const contentTypeVal = watch('content_type', 'markdown')
 
 const fetchTopics = async () => {
     const { data } = await supabase.from('topics').select('id, name, category_id, categories(name)').order('name')
@@ -201,6 +204,7 @@ const fetchTopics = async () => {
         title: data.title,
         slug: data.slug,
         content: cleanContent,
+        content_type: data.content_type || 'markdown',
         topic_id: data.topic_id,
         author: data.author || '',
         published: data.published,
@@ -445,9 +449,44 @@ useEffect(() => {
     reader.onload = (event) => {
       const content = event.target.result
       setValue('content', content)
+      setValue('content_type', 'markdown')
     }
     reader.readAsText(file)
-    // Reset input so the same file can be uploaded again if needed
+    e.target.value = ''
+  }
+
+  const extractContentFromHTML = (htmlString) => {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(htmlString, 'text/html')
+    
+    const konten = doc.querySelector('div.konten') || doc.querySelector('article.konten') || doc.querySelector('.konten')
+    if (konten) {
+      return konten.innerHTML
+    }
+    
+    const body = doc.querySelector('body')
+    if (body) {
+      const clone = body.cloneNode(true)
+      const scripts = clone.querySelectorAll('script, style')
+      scripts.forEach(s => s.remove())
+      return clone.innerHTML
+    }
+    
+    return htmlString
+  }
+
+  const handleHtmlImport = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const rawHtml = event.target.result
+      const content = extractContentFromHTML(rawHtml)
+      setValue('content', content)
+      setValue('content_type', 'html')
+    }
+    reader.readAsText(file)
     e.target.value = ''
   }
 
@@ -463,17 +502,28 @@ useEffect(() => {
 
     let autoDesc = finalContent
       .replace(/<!--[\s\S]*?-->/g, '') // remove HTML comments
-      .replace(/!\[.*?\]\(.*?\)/g, '') // remove images
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // remove links but keep text
-      .replace(/[#*`_>~]/g, '') // remove markdown characters
-      .replace(/\n+/g, ' ') // replace newlines with spaces
-      .trim();
+
+    // Handle based on content type
+    if (values.content_type === 'html') {
+      // For HTML: strip all HTML tags
+      autoDesc = autoDesc.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+    } else {
+      // For Markdown: existing logic
+      autoDesc = autoDesc
+        .replace(/!\[.*?\]\(.*?\)/g, '') // remove images
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // remove links but keep text
+        .replace(/[#*`_>~]/g, '') // remove markdown characters
+        .replace(/\n+/g, ' ') // replace newlines with spaces
+        .trim()
+    }
+    
     if (autoDesc.length > 160) autoDesc = autoDesc.substring(0, 160) + '...';
 
     const payload = {
       title: values.title,
       slug: values.slug,
       content: finalContent,
+      content_type: values.content_type || 'markdown',
       topic_id: parseInt(values.topic_id),
       author: values.author || null,
       image_url: values.image_url || null,
@@ -568,6 +618,8 @@ useEffect(() => {
                 <label className="label">Penulis</label>
                 <input className="input-field" {...register('author')} placeholder="Nama penulis" />
               </div>
+              
+              <input type="hidden" {...register('content_type')} />
             </div>
 
 {/* Image upload */}
@@ -787,7 +839,16 @@ useEffect(() => {
             {/* Content editor + preview toggle */}
             <div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-                <label className="label mb-0">Konten Artikel (Markdown)</label>
+                <div className="flex items-center gap-3">
+                  <label className="label mb-0">Konten Artikel</label>
+                  <select 
+                    {...register('content_type')}
+                    className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-1.5 bg-white dark:bg-dark-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  >
+                    <option value="markdown">Markdown</option>
+                    <option value="html">HTML</option>
+                  </select>
+                </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   {/* Markdown Import */}
                   <input 
@@ -797,28 +858,49 @@ useEffect(() => {
                     className="hidden" 
                     onChange={handleMarkdownImport} 
                   />
-                  <button 
-                    type="button" 
-                    onClick={() => mdInputRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-brand-600 dark:text-brand-400 border border-brand-500/30 rounded-lg hover:bg-brand-500/10 transition-colors"
-                  >
-                    <FileUp size={14} /> Import .md
-                  </button>
+                  {/* HTML Import */}
+                  <input 
+                    type="file" 
+                    accept=".html" 
+                    ref={htmlInputRef} 
+                    className="hidden" 
+                    onChange={handleHtmlImport} 
+                  />
+                  
+                  {contentTypeVal === 'markdown' ? (
+                    <button 
+                      type="button" 
+                      onClick={() => mdInputRef.current?.click()}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-brand-600 dark:text-brand-400 border border-brand-500/30 rounded-lg hover:bg-brand-500/10 transition-colors"
+                    >
+                      <FileUp size={14} /> Import .md
+                    </button>
+                  ) : (
+                    <button 
+                      type="button" 
+                      onClick={() => htmlInputRef.current?.click()}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-brand-600 dark:text-brand-400 border border-brand-500/30 rounded-lg hover:bg-brand-500/10 transition-colors"
+                    >
+                      <FileCode size={14} /> Import .html
+                    </button>
+                  )}
 
-                  <div className="flex border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden shrink-0 transition-colors">
-                    <button type="button" onClick={() => togglePreview(false)}
-                      className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${!previewMode ? 'bg-brand-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
-                      <Code2 size={14} /> Editor
-                    </button>
-                    <button type="button" onClick={() => togglePreview(true)}
-                      className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${previewMode ? 'bg-brand-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
-                      <Eye size={14} /> Preview
-                    </button>
-                  </div>
+                  {contentTypeVal === 'markdown' && (
+                    <div className="flex border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden shrink-0 transition-colors">
+                      <button type="button" onClick={() => togglePreview(false)}
+                        className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${!previewMode ? 'bg-brand-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
+                        <Code2 size={14} /> Editor
+                      </button>
+                      <button type="button" onClick={() => togglePreview(true)}
+                        className={`flex items-center gap-1 px-4 py-2 text-xs font-medium transition-colors ${previewMode ? 'bg-brand-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
+                        <Eye size={14} /> Preview
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {!previewMode && (
+              {contentTypeVal === 'markdown' && !previewMode && (
                 <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 dark:bg-slate-800/50 border-x border-t border-slate-200 dark:border-slate-700/50 rounded-t-xl overflow-x-auto no-scrollbar transition-colors">
                   <div className="flex items-center gap-1 pr-2 mr-2 border-r border-slate-200 dark:border-slate-700/50 transition-colors">
                     <button type="button" onClick={() => insertMarkdown('**', '**', 'teks-tebal')} className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Bold"><Bold size={16} /></button>
@@ -877,27 +959,56 @@ useEffect(() => {
                 </div>
               )}
 
-{previewMode ? (
-                <div 
-                  ref={previewRef}
-                  className="h-[600px] overflow-y-auto bg-slate-50 dark:bg-dark-800/50 border border-slate-200 dark:border-slate-700/50 rounded-b-xl p-8 prose dark:prose-invert prose-lg max-w-none transition-colors
-                  prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-white 
-                  prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-code:text-accent-600 dark:prose-code:text-accent-400
-                  prose-code:bg-slate-100 dark:prose-code:bg-dark-900 prose-pre:bg-slate-100 dark:prose-pre:bg-dark-900 
-                  prose-blockquote:border-brand-500 prose-li:text-slate-700 dark:prose-li:text-slate-300 shadow-inner"
-                  dir="auto">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{contentVal || '*Konten kosong. Silakan tulis sesuatu...*'}</ReactMarkdown>
-                </div>
+              {contentTypeVal === 'html' ? (
+                <>
+                  {previewMode ? (
+                    <div 
+                      ref={previewRef}
+                      className="h-[600px] overflow-y-auto bg-slate-50 dark:bg-dark-800/50 border border-slate-200 dark:border-slate-700/50 rounded-b-xl p-8 prose dark:prose-invert prose-lg max-w-none transition-colors
+                      prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-white 
+                      prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-code:text-accent-600 dark:prose-code:text-accent-400
+                      prose-code:bg-slate-100 dark:prose-code:bg-dark-900 prose-pre:bg-slate-100 dark:prose-pre:bg-dark-900 
+                      prose-blockquote:border-brand-500 prose-li:text-slate-700 dark:prose-li:text-slate-300 shadow-inner"
+                      dir="auto"
+                      dangerouslySetInnerHTML={{ __html: contentVal || '<p class="text-slate-400">Konten kosong. Silakan tulis sesuatu...</p>' }}
+                    />
+                  ) : (
+                    <textarea
+                      className="input-field rounded-t-none resize-none font-mono text-sm h-[600px] p-6"
+                      placeholder="<!-- Tulis konten HTML Anda di sini -->&#10;<h2>Judul</h2>&#10;<p>Paragraf...</p>"
+                      {...register('content')}
+                      ref={(e) => {
+                        register('content').ref(e)
+                        textareaRef.current = e
+                      }}
+                    />
+                  )}
+                </>
               ) : (
-                <textarea
-                  className="input-field rounded-t-none resize-none font-mono text-sm h-[600px] p-6"
-                  placeholder="# Judul Artikel&#10;&#10;Tulis isi artikel Anda dengan format Markdown di sini...&#10;&#10;Gunakan toolbar di atas untuk melihat preview."
-                  {...register('content')}
-                  ref={(e) => {
-                    register('content').ref(e)
-                    textareaRef.current = e
-                  }}
-                />
+                <>
+                  {previewMode ? (
+                    <div 
+                      ref={previewRef}
+                      className="h-[600px] overflow-y-auto bg-slate-50 dark:bg-dark-800/50 border border-slate-200 dark:border-slate-700/50 rounded-b-xl p-8 prose dark:prose-invert prose-lg max-w-none transition-colors
+                      prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-white 
+                      prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-code:text-accent-600 dark:prose-code:text-accent-400
+                      prose-code:bg-slate-100 dark:prose-code:bg-dark-900 prose-pre:bg-slate-100 dark:prose-pre:bg-dark-900 
+                      prose-blockquote:border-brand-500 prose-li:text-slate-700 dark:prose-li:text-slate-300 shadow-inner"
+                      dir="auto">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{contentVal || '*Konten kosong. Silakan tulis sesuatu...*'}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <textarea
+                      className="input-field rounded-t-none resize-none font-mono text-sm h-[600px] p-6"
+                      placeholder="# Judul Artikel&#10;&#10;Tulis isi artikel Anda dengan format Markdown di sini...&#10;&#10;Gunakan toolbar di atas untuk melihat preview."
+                      {...register('content')}
+                      ref={(e) => {
+                        register('content').ref(e)
+                        textareaRef.current = e
+                      }}
+                    />
+                  )}
+                </>
               )}
             </div>
           </form>

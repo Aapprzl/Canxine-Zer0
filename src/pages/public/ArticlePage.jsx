@@ -100,21 +100,38 @@ export default function ArticlePage() {
         </span>
       </div>
 
-{/* Markdown content */}
-      <article className="prose dark:prose-invert prose-slate max-w-none transition-colors
-        prose-headings:text-slate-900 dark:prose-headings:text-white prose-headings:font-bold
-        prose-p:text-slate-700 dark:prose-p:text-white prose-p:leading-relaxed
-        prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-a:no-underline hover:prose-a:underline
-        prose-code:text-accent-600 dark:prose-code:text-accent-400 prose-code:bg-slate-100 dark:prose-code:bg-dark-700 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-        prose-pre:bg-slate-50 dark:prose-pre:bg-dark-800 prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-700
-        prose-blockquote:border-brand-500 prose-blockquote:bg-brand-500/5 prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300
-        prose-strong:text-slate-900 dark:prose-strong:text-white prose-li:text-slate-700 dark:prose-li:text-slate-300 prose-hr:border-slate-200 dark:prose-hr:border-slate-700
-        prose-table:text-slate-700 dark:prose-table:text-slate-300 prose-th:border-slate-200 dark:prose-th:border-slate-700 prose-td:border-slate-200 dark:prose-td:border-slate-700
-      " dir="auto">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-          {article.content || ''}
-        </ReactMarkdown>
-      </article>
+      {/* Content - Markdown or HTML */}
+      {article.content_type === 'html' ? (
+        <article 
+          className="prose dark:prose-invert prose-slate max-w-none transition-colors
+            prose-headings:text-slate-900 dark:prose-headings:text-white prose-headings:font-bold
+            prose-p:text-slate-700 dark:prose-p:text-white prose-p:leading-relaxed
+            prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-a:no-underline hover:prose-a:underline
+            prose-code:text-accent-600 dark:prose-code:text-accent-400 prose-code:bg-slate-100 dark:prose-code:bg-dark-700 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+            prose-pre:bg-slate-50 dark:prose-pre:bg-dark-800 prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-700
+            prose-blockquote:border-brand-500 prose-blockquote:bg-brand-500/5 prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300
+            prose-strong:text-slate-900 dark:prose-strong:text-white prose-li:text-slate-700 dark:prose-li:text-slate-300 prose-hr:border-slate-200 dark:prose-hr:border-slate-700
+            prose-table:text-slate-700 dark:prose-table:text-slate-300 prose-th:border-slate-200 dark:prose-th:border-slate-700 prose-td:border-slate-200 dark:prose-td:border-slate-700
+          " 
+          dir="auto"
+          dangerouslySetInnerHTML={{ __html: article.content || '' }}
+        />
+      ) : (
+        <article className="prose dark:prose-invert prose-slate max-w-none transition-colors
+          prose-headings:text-slate-900 dark:prose-headings:text-white prose-headings:font-bold
+          prose-p:text-slate-700 dark:prose-p:text-white prose-p:leading-relaxed
+          prose-a:text-brand-600 dark:prose-a:text-brand-400 prose-a:no-underline hover:prose-a:underline
+          prose-code:text-accent-600 dark:prose-code:text-accent-400 prose-code:bg-slate-100 dark:prose-code:bg-dark-700 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+          prose-pre:bg-slate-50 dark:prose-pre:bg-dark-800 prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-700
+          prose-blockquote:border-brand-500 prose-blockquote:bg-brand-500/5 prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300
+          prose-strong:text-slate-900 dark:prose-strong:text-white prose-li:text-slate-700 dark:prose-li:text-slate-300 prose-hr:border-slate-200 dark:prose-hr:border-slate-700
+          prose-table:text-slate-700 dark:prose-table:text-slate-300 prose-th:border-slate-200 dark:prose-th:border-slate-700 prose-td:border-slate-200 dark:prose-td:border-slate-700
+        " dir="auto">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+            {article.content || ''}
+          </ReactMarkdown>
+        </article>
+      )}
 
       {/* Back link */}
       {topic && (
